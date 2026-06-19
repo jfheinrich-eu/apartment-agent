@@ -1,0 +1,18 @@
+[project]
+name = "wohnung-agent"
+version = "0.1.0"
+description = "Personal apartment search agent"
+requires-python = ">=3.11"
+dependencies = [
+    "requests>=2.32.0",
+    "beautifulsoup4>=4.12.0",
+    "pydantic>=2.7.0",
+    "PyYAML>=6.0.0",
+    "APScheduler>=3.10.4",
+]
+
+[project.scripts]
+wohnung-agent = "wohnung_agent.main:main"
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
