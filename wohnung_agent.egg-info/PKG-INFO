@@ -1,0 +1,10 @@
+Metadata-Version: 2.4
+Name: wohnung-agent
+Version: 0.1.0
+Summary: Personal apartment search agent
+Requires-Python: >=3.11
+Requires-Dist: requests>=2.32.0
+Requires-Dist: beautifulsoup4>=4.12.0
+Requires-Dist: pydantic>=2.7.0
+Requires-Dist: PyYAML>=6.0.0
+Requires-Dist: APScheduler>=3.10.4
