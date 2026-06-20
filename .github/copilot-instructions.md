@@ -56,4 +56,9 @@ Perform a full code-quality review of the entire project.
    - Public functions and classes have docstrings explaining *why*, not just *what*
    - No copy-paste duplication – flag code blocks that appear more than once
    - Test coverage: each adapter, filter rule, and model field should have at least one test
-7. **Output** – produce a categorized list grouped by file. For each finding state line, category, description, and recommended improvement.
+7. **Configuration consistency** – compare `config/search_profile.example.yml` and `config/search_profile.yml` against the actual config keys consumed in `config_loader.py`, `main.py`, and all adapter `__init__` methods. Flag:
+   - Keys present in the example but missing from the live config
+   - Keys present in the live config but missing from the example (undocumented options)
+   - Keys referenced in code but absent from both config files (unset defaults with no documentation)
+   - Adapter config sections (`demo`, `immowelt`, …) whose available options are not fully reflected in the example
+8. **Output** – produce a categorized list grouped by file. For each finding state line, category, description, and recommended improvement.
