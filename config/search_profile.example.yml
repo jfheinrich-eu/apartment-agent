@@ -13,7 +13,6 @@ demo:
 
 immowelt:
   enabled: true
-  headless: true
   timeout_ms: 20000
   throttle_seconds: 2.0
   search_urls:
@@ -29,6 +28,7 @@ immowelt:
       city_hint: "Boizenburg"
     - url: "https://www.immowelt.de/suche/lueneburg/wohnungen/mieten"
       city_hint: "Lüneburg"
+database_path: wohnungen.sqlite3
 
 telegram:
   enabled: false

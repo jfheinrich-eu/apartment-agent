@@ -43,12 +43,10 @@ class ImmoweltAdapter(ApartmentAdapter):
     def __init__(
         self,
         search_urls: list[str | dict[str, str]],
-        headless: bool = True,
         timeout_ms: int = 20_000,
         throttle_seconds: float = 2.0,
     ) -> None:
         self.search_urls = [self._normalize_search_url(item) for item in search_urls]
-        self.headless = headless
         self.timeout_ms = timeout_ms
         self.throttle_seconds = throttle_seconds
         self._headers = {
@@ -67,26 +65,30 @@ class ImmoweltAdapter(ApartmentAdapter):
             LOGGER.warning("No Immowelt search URLs configured.")
             return apartments
 
-        for search_url in self.search_urls:
-            try:
-                LOGGER.info("Loading Immowelt search URL: %s", search_url.url)
-                session = requests.Session()
-                session.max_redirects = 5
-                response = session.get(
-                    search_url.url,
-                    headers=self._headers,
-                    timeout=max(1.0, self.timeout_ms / 1000.0),
-                    allow_redirects=True,
-                )
-                response.raise_for_status()
-                apartments.extend(self._parse_html(response.text, search_url, profile))
-                time.sleep(self.throttle_seconds)
-            except requests.Timeout as error:
-                LOGGER.warning("Immowelt timeout for %s: %s", search_url.url, error)
-            except requests.RequestException as error:
-                LOGGER.warning("Immowelt request failed for %s: %s", search_url.url, error)
-            except Exception:
-                LOGGER.exception("Immowelt adapter failed for %s", search_url.url)
+        session = requests.Session()
+        session.max_redirects = 5
+
+        try:
+            for search_url in self.search_urls:
+                try:
+                    LOGGER.info("Loading Immowelt search URL: %s", search_url.url)
+                    response = session.get(
+                        search_url.url,
+                        headers=self._headers,
+                        timeout=max(1.0, self.timeout_ms / 1000.0),
+                        allow_redirects=True,
+                    )
+                    response.raise_for_status()
+                    apartments.extend(self._parse_html(response.text, search_url, profile))
+                    time.sleep(self.throttle_seconds)
+                except requests.Timeout as error:
+                    LOGGER.warning("Immowelt timeout for %s: %s", search_url.url, error)
+                except requests.RequestException as error:
+                    LOGGER.warning("Immowelt request failed for %s: %s", search_url.url, error)
+                except Exception:
+                    LOGGER.exception("Immowelt adapter failed for %s", search_url.url)
+        finally:
+            session.close()
 
         return self._deduplicate(apartments)
 

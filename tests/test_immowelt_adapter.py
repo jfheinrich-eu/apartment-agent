@@ -22,12 +22,10 @@ def test_immowelt_adapter_respects_config_parameters():
     ]
     adapter = ImmoweltAdapter(
         search_urls=search_urls,
-        headless=False,
         timeout_ms=30_000,
         throttle_seconds=5.0,
     )
 
-    assert adapter.headless is False
     assert adapter.timeout_ms == 30_000
     assert adapter.throttle_seconds == 5.0
     assert len(adapter.search_urls) == 1

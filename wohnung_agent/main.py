@@ -4,7 +4,7 @@ import argparse
 import logging
 from apscheduler.schedulers.blocking import BlockingScheduler
 from wohnung_agent.adapters.demo_adapter import DemoAdapter
-from wohnung_agent.config_loader import load_config, load_search_profile
+from wohnung_agent.config_loader import load_config, load_database_path, load_search_profile
 from wohnung_agent.database import ApartmentDatabase
 from wohnung_agent.filter_engine import FilterEngine
 from wohnung_agent.notifier import Notifier
@@ -29,7 +29,6 @@ def build_runner(config_path: str) -> ApartmentSearchRunner:
             adapters.append(
                 ImmoweltAdapter(
                     search_urls=immowelt_config.get("search_urls", []),
-                    headless=immowelt_config.get("headless", True),
                     timeout_ms=immowelt_config.get("timeout_ms", 20_000),
                     throttle_seconds=immowelt_config.get("throttle_seconds", 2.0),
                 )
@@ -42,7 +41,7 @@ def build_runner(config_path: str) -> ApartmentSearchRunner:
         raise ValueError("No adapters enabled. Enable demo or immowelt in the config file.")
     
     filter_engine = FilterEngine(profile)
-    database = ApartmentDatabase("wohnungen.sqlite3")
+    database = ApartmentDatabase(load_database_path(config))
     notifier = Notifier(config)
 
     return ApartmentSearchRunner(
@@ -68,7 +67,7 @@ def main() -> None:
 
     scheduler = BlockingScheduler()
     scheduler.add_job(runner.run_once, "interval", minutes=args.interval_minutes, next_run_time=None)
-    print(f"Wohnung-Agent läuft. Intervall: {args.interval_minutes} Minuten")
+    LOGGER.info("Apartment agent running with interval: %s minutes", args.interval_minutes)
     scheduler.start()
 
 

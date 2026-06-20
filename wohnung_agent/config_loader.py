@@ -24,3 +24,7 @@ def load_search_profile(config: dict[str, Any]) -> SearchProfile:
         kitchen_required=config.get("kitchen_required", True),
         regions=config["regions"],
     )
+
+
+def load_database_path(config: dict[str, Any]) -> str:
+    return str(config.get("database_path", "wohnungen.sqlite3"))

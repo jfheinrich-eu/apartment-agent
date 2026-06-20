@@ -1,9 +1,13 @@
 from __future__ import annotations
 
+import logging
+
 from wohnung_agent.adapters.base import ApartmentAdapter
 from wohnung_agent.database import ApartmentDatabase
 from wohnung_agent.filter_engine import FilterEngine
 from wohnung_agent.notifier import Notifier
+
+LOGGER = logging.getLogger(__name__)
 
 
 class ApartmentSearchRunner:
@@ -29,35 +33,38 @@ class ApartmentSearchRunner:
 
     def run_once(self) -> None:
         """Execute one complete search cycle across all adapters."""
-        print("Starte Wohnungssuche...")
+        LOGGER.info("Starting apartment search")
 
         for adapter in self.adapters:
-            print(f"Adapter: {adapter.__class__.__name__}")
+            LOGGER.info("Adapter: %s", adapter.__class__.__name__)
 
             # All adapters must implement: search(profile: SearchProfile) -> list[Apartment]
             apartments = adapter.search(self.filter_engine.profile)
-            print(f"Gefundene Roh-Treffer: {len(apartments)}")
+            LOGGER.info("Raw apartments found: %s", len(apartments))
 
             for apartment in apartments:
-                print(
-                    f"Prüfe: {apartment.title} | {apartment.warm_rent_eur} € | {apartment.rooms} Zimmer"
+                LOGGER.info(
+                    "Evaluating apartment: %s | %s € | %s rooms",
+                    apartment.title,
+                    apartment.warm_rent_eur,
+                    apartment.rooms,
                 )
 
                 # Evaluate apartment against search profile
-                match = self.filter_engine.evaluate(apartment)
-                print(f"Score: {match.score}, Rejected: {match.rejected}")
-                print(f"Gründe: {', '.join(match.reasons)}")
+                apartment_match = self.filter_engine.evaluate(apartment)
+                LOGGER.info("Score: %s, Rejected: %s", apartment_match.score, apartment_match.rejected)
+                LOGGER.info("Reasons: %s", ", ".join(apartment_match.reasons))
 
                 # Skip rejected apartments
-                if match.rejected:
+                if apartment_match.rejected:
                     continue
 
                 # Skip duplicates
                 if self.database.exists(apartment):
-                    print("Schon bekannt.")
+                    LOGGER.info("Already known")
                     continue
 
                 # Save new match and notify
-                self.database.save_match(match)
-                print(f"NEUER TREFFER: {apartment.title}")
-                self.notifier.send(match)
+                self.database.save_match(apartment_match)
+                LOGGER.info("New apartment match: %s", apartment.title)
+                self.notifier.send(apartment_match)
