@@ -84,3 +84,9 @@ class ApartmentDatabase:
 
     def close(self) -> None:
         self.connection.close()
+
+    def __enter__(self) -> ApartmentDatabase:
+        return self
+
+    def __exit__(self, exc_type, exc_value, exc_traceback) -> None:
+        self.close()

@@ -39,7 +39,7 @@ def build_runner(config_path: str) -> ApartmentSearchRunner:
 
     if not adapters:
         raise ValueError("No adapters enabled. Enable demo or immowelt in the config file.")
-    
+
     filter_engine = FilterEngine(profile)
     database = ApartmentDatabase(load_database_path(config))
     notifier = Notifier(config)

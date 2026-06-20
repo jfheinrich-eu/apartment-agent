@@ -33,7 +33,8 @@ class Notifier:
 
     def send(self, apartment_match: ApartmentMatch) -> None:
         message = format_match(apartment_match)
-        print("\n" + message + "\n")
+        LOGGER.info("Notification prepared for %s", apartment_match.apartment.title)
+        LOGGER.debug("Notification body:\n%s", message)
         self._send_telegram(message)
         self._send_email(message)
 
@@ -49,12 +50,15 @@ class Notifier:
             return
 
         LOGGER.info("Sending Telegram notification")
-        response = requests.post(
-            f"https://api.telegram.org/bot{bot_token}/sendMessage",
-            json={"chat_id": chat_id, "text": message},
-            timeout=20,
-        )
-        response.raise_for_status()
+        try:
+            response = requests.post(
+                f"https://api.telegram.org/bot{bot_token}/sendMessage",
+                json={"chat_id": chat_id, "text": message},
+                timeout=20,
+            )
+            response.raise_for_status()
+        except requests.RequestException:
+            LOGGER.exception("Telegram notification failed")
 
     def _send_email(self, message: str) -> None:
         email_config = self.config.get("email", {})
@@ -79,7 +83,10 @@ class Notifier:
 
         tls_context = ssl.create_default_context()
         LOGGER.info("Sending email notification to %s via %s", recipient, smtp_host)
-        with smtplib.SMTP(smtp_host, smtp_port) as smtp:
-            smtp.starttls(context=tls_context)
-            smtp.login(username, password)
-            smtp.send_message(email_message)
+        try:
+            with smtplib.SMTP(smtp_host, smtp_port) as smtp:
+                smtp.starttls(context=tls_context)
+                smtp.login(username, password)
+                smtp.send_message(email_message)
+        except (OSError, smtplib.SMTPException):
+            LOGGER.exception("Email notification failed for %s via %s", recipient, smtp_host)
