@@ -1,2 +1,0 @@
-[console_scripts]
-wohnung-agent = wohnung_agent.main:main
