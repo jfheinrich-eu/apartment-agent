@@ -62,3 +62,22 @@ Perform a full code-quality review of the entire project.
    - Keys referenced in code but absent from both config files (unset defaults with no documentation)
    - Adapter config sections (`demo`, `immowelt`, …) whose available options are not fully reflected in the example
 8. **Output** – produce a categorized list grouped by file. For each finding state line, category, description, and recommended improvement.
+
+---
+
+### /code-review
+
+Perform a complete code review of the entire project and provide actionable in-code annotations that can be worked through directly in VS Code.
+
+1. **Scope** – review all production code in `wohnung_agent/`, key configs in `config/`, and test coverage in `tests/`.
+2. **Review focus** – identify bugs, risks, regressions, maintainability issues, and missing tests first (severity order: Critical / High / Medium / Low).
+3. **Annotation format** – for each finding, propose an inline code annotation in this format so it can be inserted directly in files:
+   - `# TODO(code-review): <short action>`
+   - `# FIXME(code-review): <bug/risk to fix>`
+   - `# NOTE(code-review): <important context or constraint>`
+4. **Placement** – provide exact file and line for each annotation target and ensure annotation text is concise and implementation-oriented.
+5. **Quality bar** – do not produce cosmetic-only findings. Focus on real engineering impact: correctness, security, resiliency, performance, and testability.
+6. **Output** – return:
+   - A prioritized findings list (with file + line + rationale)
+   - A patch-ready annotation list grouped by file (only annotation lines, no code rewrites unless requested)
+   - A short execution plan for addressing the annotations in order.
