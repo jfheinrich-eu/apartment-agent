@@ -1,0 +1,197 @@
+from __future__ import annotations
+
+import logging
+import time
+from dataclasses import dataclass
+from typing import Any
+from urllib.parse import urljoin
+
+from bs4 import BeautifulSoup
+from playwright.sync_api import sync_playwright, TimeoutError as PlaywrightTimeoutError
+
+from wohnung_agent.adapters.base import ApartmentAdapter
+from wohnung_agent.adapters.text_parsing import (
+    detect_city,
+    parse_has_kitchen,
+    parse_living_area,
+    parse_rooms,
+    parse_warm_rent,
+    stable_id_from_url,
+)
+from wohnung_agent.models import Apartment, SearchProfile
+
+LOGGER = logging.getLogger(__name__)
+
+
+@dataclass(frozen=True)
+class ImmoweltSearchUrl:
+    url: str
+    city_hint: str | None = None
+
+
+class ImmoweltAdapter(ApartmentAdapter):
+    """Adapter for Immowelt search result pages.
+
+    This adapter expects manually prepared Immowelt search URLs in the YAML config.
+    That is deliberate: Immowelt changes URL parameters and location ids over time.
+    Copying a working browser search URL into the config is more stable than trying
+    to guess the internal search URL format.
+    """
+
+    source_name = "immowelt"
+
+    def __init__(
+        self,
+        search_urls: list[str | dict[str, str]],
+        headless: bool = True,
+        timeout_ms: int = 20_000,
+        throttle_seconds: float = 2.0,
+    ) -> None:
+        self.search_urls = [self._normalize_search_url(item) for item in search_urls]
+        self.headless = headless
+        self.timeout_ms = timeout_ms
+        self.throttle_seconds = throttle_seconds
+
+    def search(self, profile: SearchProfile) -> list[Apartment]:
+        apartments: list[Apartment] = []
+
+        if not self.search_urls:
+            LOGGER.warning("No Immowelt search URLs configured.")
+            return apartments
+
+        with sync_playwright() as playwright:
+            browser = playwright.chromium.launch(headless=self.headless)
+            context = browser.new_context(
+                user_agent=(
+                    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+                    "AppleWebKit/537.36 (KHTML, like Gecko) "
+                    "Chrome/126.0 Safari/537.36"
+                ),
+                locale="de-DE",
+            )
+            page = context.new_page()
+
+            for search_url in self.search_urls:
+                try:
+                    LOGGER.info("Loading Immowelt search URL: %s", search_url.url)
+                    page.goto(search_url.url, wait_until="domcontentloaded", timeout=self.timeout_ms)
+                    self._try_accept_cookies(page)
+                    page.wait_for_load_state("networkidle", timeout=self.timeout_ms)
+                    html = page.content()
+                    apartments.extend(self._parse_html(html, search_url, profile))
+                    time.sleep(self.throttle_seconds)
+                except PlaywrightTimeoutError as error:
+                    LOGGER.warning("Immowelt timeout for %s: %s", search_url.url, error)
+                except Exception:
+                    LOGGER.exception("Immowelt adapter failed for %s", search_url.url)
+
+            context.close()
+            browser.close()
+
+        return self._deduplicate(apartments)
+
+    def _parse_html(
+        self,
+        html: str,
+        search_url: ImmoweltSearchUrl,
+        profile: SearchProfile,
+    ) -> list[Apartment]:
+        soup = BeautifulSoup(html, "html.parser")
+        expose_links = self._find_expose_links(soup, search_url.url)
+        apartments: list[Apartment] = []
+
+        for link_element, absolute_url in expose_links:
+            card = self._find_card_container(link_element)
+            card_text = " ".join(card.get_text(" ", strip=True).split()) if card else link_element.get_text(" ", strip=True)
+            title = self._extract_title(link_element, card_text)
+
+            if not title or len(card_text) < 20:
+                continue
+
+            apartments.append(
+                Apartment(
+                    source=self.source_name,
+                    external_id=stable_id_from_url(absolute_url),
+                    title=title,
+                    url=absolute_url,
+                    city=detect_city(card_text, profile.regions, fallback=search_url.city_hint),
+                    warm_rent_eur=parse_warm_rent(card_text),
+                    rooms=parse_rooms(card_text),
+                    living_area_sqm=parse_living_area(card_text),
+                    has_kitchen=parse_has_kitchen(card_text),
+                    address=None,
+                )
+            )
+
+        return apartments
+
+    def _find_expose_links(self, soup: BeautifulSoup, base_url: str) -> list[tuple[Any, str]]:
+        result: list[tuple[Any, str]] = []
+        seen_urls: set[str] = set()
+
+        for link_element in soup.find_all("a", href=True):
+            href = str(link_element["href"])
+            normalized_href = href.casefold()
+            if not any(marker in normalized_href for marker in ("expose", "exposé", "/expose/")):
+                continue
+
+            absolute_url = urljoin(base_url, href).split("#", 1)[0]
+            if absolute_url in seen_urls:
+                continue
+
+            seen_urls.add(absolute_url)
+            result.append((link_element, absolute_url))
+
+        return result
+
+    def _find_card_container(self, link_element: Any) -> Any | None:
+        current = link_element
+        for _ in range(8):
+            current = current.parent
+            if current is None:
+                return None
+            text = current.get_text(" ", strip=True).casefold()
+            has_rent = "€" in text
+            has_rooms = "zimmer" in text or " zi" in text
+            if has_rent and has_rooms:
+                return current
+        return link_element.parent
+
+    def _extract_title(self, link_element: Any, card_text: str) -> str:
+        direct_text = " ".join(link_element.get_text(" ", strip=True).split())
+        if len(direct_text) >= 12:
+            return direct_text[:180]
+
+        for heading in link_element.find_all(["h1", "h2", "h3", "h4"]):
+            heading_text = " ".join(heading.get_text(" ", strip=True).split())
+            if len(heading_text) >= 12:
+                return heading_text[:180]
+
+        return card_text[:120]
+
+    def _try_accept_cookies(self, page: Any) -> None:
+        candidates = [
+            "button:has-text('Akzeptieren')",
+            "button:has-text('Alle akzeptieren')",
+            "button:has-text('Zustimmen')",
+            "button:has-text('Einverstanden')",
+        ]
+        for selector in candidates:
+            try:
+                button = page.locator(selector).first
+                if button.count() > 0 and button.is_visible():
+                    button.click(timeout=2_000)
+                    return
+            except Exception:
+                continue
+
+    def _deduplicate(self, apartments: list[Apartment]) -> list[Apartment]:
+        deduplicated: dict[str, Apartment] = {}
+        for apartment in apartments:
+            deduplicated[apartment.unique_key] = apartment
+        return list(deduplicated.values())
+
+    def _normalize_search_url(self, item: str | dict[str, str]) -> ImmoweltSearchUrl:
+        if isinstance(item, str):
+            return ImmoweltSearchUrl(url=item)
+        return ImmoweltSearchUrl(url=item["url"], city_hint=item.get("city_hint"))

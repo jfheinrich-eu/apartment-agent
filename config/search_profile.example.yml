@@ -7,10 +7,34 @@ regions:
   - Lauenburg
   - Boizenburg
   - Lüneburg
+
+demo:
+  enabled: false
+
+immowelt:
+  enabled: true
+  headless: true
+  timeout_ms: 20000
+  throttle_seconds: 2.0
+  search_urls:
+    # Copy the final Immowelt search result URL from your browser after setting filters.
+    # Add one URL per region. city_hint helps if the result card text does not contain the city.
+    - url: "https://www.immowelt.de/suche/meldorf/wohnungen/mieten"
+      city_hint: "Meldorf"
+    - url: "https://www.immowelt.de/suche/glueckstadt/wohnungen/mieten"
+      city_hint: "Glückstadt"
+    - url: "https://www.immowelt.de/suche/lauenburg-elbe/wohnungen/mieten"
+      city_hint: "Lauenburg"
+    - url: "https://www.immowelt.de/suche/boizenburg-elbe/wohnungen/mieten"
+      city_hint: "Boizenburg"
+    - url: "https://www.immowelt.de/suche/lueneburg/wohnungen/mieten"
+      city_hint: "Lüneburg"
+
 telegram:
   enabled: false
   bot_token: ""
   chat_id: ""
+
 email:
   enabled: false
   smtp_host: ""
