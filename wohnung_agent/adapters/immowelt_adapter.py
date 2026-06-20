@@ -7,7 +7,7 @@ from typing import Any
 from urllib.parse import urljoin
 
 from bs4 import BeautifulSoup
-from playwright.sync_api import sync_playwright, TimeoutError as PlaywrightTimeoutError
+import requests
 
 from wohnung_agent.adapters.base import ApartmentAdapter
 from wohnung_agent.adapters.text_parsing import (
@@ -51,6 +51,14 @@ class ImmoweltAdapter(ApartmentAdapter):
         self.headless = headless
         self.timeout_ms = timeout_ms
         self.throttle_seconds = throttle_seconds
+        self._headers = {
+            "User-Agent": (
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+                "AppleWebKit/537.36 (KHTML, like Gecko) "
+                "Chrome/126.0 Safari/537.36"
+            ),
+            "Accept-Language": "de-DE,de;q=0.9,en;q=0.8",
+        }
 
     def search(self, profile: SearchProfile) -> list[Apartment]:
         apartments: list[Apartment] = []
@@ -59,34 +67,23 @@ class ImmoweltAdapter(ApartmentAdapter):
             LOGGER.warning("No Immowelt search URLs configured.")
             return apartments
 
-        with sync_playwright() as playwright:
-            browser = playwright.chromium.launch(headless=self.headless)
-            context = browser.new_context(
-                user_agent=(
-                    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-                    "AppleWebKit/537.36 (KHTML, like Gecko) "
-                    "Chrome/126.0 Safari/537.36"
-                ),
-                locale="de-DE",
-            )
-            page = context.new_page()
-
-            for search_url in self.search_urls:
-                try:
-                    LOGGER.info("Loading Immowelt search URL: %s", search_url.url)
-                    page.goto(search_url.url, wait_until="domcontentloaded", timeout=self.timeout_ms)
-                    self._try_accept_cookies(page)
-                    page.wait_for_load_state("networkidle", timeout=self.timeout_ms)
-                    html = page.content()
-                    apartments.extend(self._parse_html(html, search_url, profile))
-                    time.sleep(self.throttle_seconds)
-                except PlaywrightTimeoutError as error:
-                    LOGGER.warning("Immowelt timeout for %s: %s", search_url.url, error)
-                except Exception:
-                    LOGGER.exception("Immowelt adapter failed for %s", search_url.url)
-
-            context.close()
-            browser.close()
+        for search_url in self.search_urls:
+            try:
+                LOGGER.info("Loading Immowelt search URL: %s", search_url.url)
+                response = requests.get(
+                    search_url.url,
+                    headers=self._headers,
+                    timeout=max(1.0, self.timeout_ms / 1000.0),
+                )
+                response.raise_for_status()
+                apartments.extend(self._parse_html(response.text, search_url, profile))
+                time.sleep(self.throttle_seconds)
+            except requests.Timeout as error:
+                LOGGER.warning("Immowelt timeout for %s: %s", search_url.url, error)
+            except requests.RequestException as error:
+                LOGGER.warning("Immowelt request failed for %s: %s", search_url.url, error)
+            except Exception:
+                LOGGER.exception("Immowelt adapter failed for %s", search_url.url)
 
         return self._deduplicate(apartments)
 
@@ -168,22 +165,6 @@ class ImmoweltAdapter(ApartmentAdapter):
                 return heading_text[:180]
 
         return card_text[:120]
-
-    def _try_accept_cookies(self, page: Any) -> None:
-        candidates = [
-            "button:has-text('Akzeptieren')",
-            "button:has-text('Alle akzeptieren')",
-            "button:has-text('Zustimmen')",
-            "button:has-text('Einverstanden')",
-        ]
-        for selector in candidates:
-            try:
-                button = page.locator(selector).first
-                if button.count() > 0 and button.is_visible():
-                    button.click(timeout=2_000)
-                    return
-            except Exception:
-                continue
 
     def _deduplicate(self, apartments: list[Apartment]) -> list[Apartment]:
         deduplicated: dict[str, Apartment] = {}

@@ -1,14 +1,16 @@
 from __future__ import annotations
 
 import argparse
+import logging
 from apscheduler.schedulers.blocking import BlockingScheduler
 from wohnung_agent.adapters.demo_adapter import DemoAdapter
-# from wohnung_agent.adapters.immowelt_adapter import ImmoweltAdapter
 from wohnung_agent.config_loader import load_config, load_search_profile
 from wohnung_agent.database import ApartmentDatabase
 from wohnung_agent.filter_engine import FilterEngine
 from wohnung_agent.notifier import Notifier
 from wohnung_agent.runner import ApartmentSearchRunner
+
+LOGGER = logging.getLogger(__name__)
 
 
 def build_runner(config_path: str) -> ApartmentSearchRunner:
@@ -22,17 +24,23 @@ def build_runner(config_path: str) -> ApartmentSearchRunner:
 
     immowelt_config = config.get("immowelt", {})
     if immowelt_config.get("enabled", False):
-        adapters.append(
-            ImmoweltAdapter(
-                search_urls=immowelt_config.get("search_urls", []),
-                headless=immowelt_config.get("headless", True),
-                timeout_ms=immowelt_config.get("timeout_ms", 20_000),
-                throttle_seconds=immowelt_config.get("throttle_seconds", 2.0),
+        try:
+            from wohnung_agent.adapters.immowelt_adapter import ImmoweltAdapter
+            adapters.append(
+                ImmoweltAdapter(
+                    search_urls=immowelt_config.get("search_urls", []),
+                    headless=immowelt_config.get("headless", True),
+                    timeout_ms=immowelt_config.get("timeout_ms", 20_000),
+                    throttle_seconds=immowelt_config.get("throttle_seconds", 2.0),
+                )
             )
-        )
+        except ImportError:
+            LOGGER.error("Immowelt adapter enabled but could not be imported.")
+            raise
 
     if not adapters:
         raise ValueError("No adapters enabled. Enable demo or immowelt in the config file.")
+    
     filter_engine = FilterEngine(profile)
     database = ApartmentDatabase("wohnungen.sqlite3")
     notifier = Notifier(config)
