@@ -4,6 +4,8 @@ import hashlib
 import re
 from urllib.parse import urlparse, parse_qs
 
+from wohnung_agent.i18n import tr
+
 
 def stable_id_from_url(url: str) -> str:
     """Create a stable fallback identifier from a listing URL."""
@@ -85,7 +87,12 @@ def parse_has_kitchen(text: str) -> bool | None:
     return None
 
 
-def detect_city(text: str, regions: list[str], fallback: str | None = None) -> str:
+def detect_city(
+    text: str,
+    regions: list[str],
+    fallback: str | None = None,
+    language: str = "en",
+) -> str:
     """Detect the best matching region name from free-form listing text."""
     normalized = text.casefold()
     for region in regions:
@@ -93,4 +100,4 @@ def detect_city(text: str, regions: list[str], fallback: str | None = None) -> s
             return region
     if fallback:
         return fallback
-    return "Unbekannt"
+    return tr(language, "text.unknown_city")

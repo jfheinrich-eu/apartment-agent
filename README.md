@@ -28,6 +28,7 @@ Edit `config/search_profile.yml` to configure:
 
 - **Search criteria**: `max_warm_rent`, `min_rooms`, `kitchen_required`, `regions`
 - **Adapters**: `demo` (test data), `immowelt` (web scraping)
+- **Language**: `language` (`en` or `de`, fallback: system locale, then `en`)
 - **Notifications**: `telegram`, `email` (optional)
 
 ### Immowelt Adapter
@@ -45,7 +46,6 @@ This is intentional: Portal URLs and filter parameters change frequently.
 ```yaml
 immowelt:
   enabled: true
-  headless: true
   timeout_ms: 20000
   throttle_seconds: 2.0
   search_urls:
@@ -59,9 +59,19 @@ immowelt:
 
 - `enabled`: Whether to enable this adapter
 - `search_urls`: List of Immowelt search result URLs (required)
-- `headless`: Run browser headless (faster, no window)
 - `timeout_ms`: Page load timeout in milliseconds
 - `throttle_seconds`: Delay between requests (be respectful to the server)
+
+### Language settings
+
+You can control output language via config:
+
+```yaml
+language: en
+```
+
+Supported values: `en`, `de`.
+If not configured, the application uses the system locale and falls back to English.
 
 ## Usage
 

@@ -6,36 +6,39 @@ import ssl
 from email.message import EmailMessage
 from typing import Any
 import requests
+from wohnung_agent.i18n import tr
 from wohnung_agent.models import ApartmentMatch
 
 LOGGER = logging.getLogger(__name__)
 
 
-def format_match(apartment_match: ApartmentMatch) -> str:
+def format_match(apartment_match: ApartmentMatch, language: str) -> str:
     apartment = apartment_match.apartment
-    rent = "unbekannt" if apartment.warm_rent_eur is None else f"{apartment.warm_rent_eur:.0f} € warm"
-    rooms = "unbekannt" if apartment.rooms is None else str(apartment.rooms)
+    unknown = tr(language, "notifier.unknown")
+    rent = unknown if apartment.warm_rent_eur is None else f"{apartment.warm_rent_eur:.0f} EUR"
+    rooms = unknown if apartment.rooms is None else str(apartment.rooms)
     reasons = "\n".join(f"- {reason}" for reason in apartment_match.reasons)
 
     return (
-        f"NEUER TREFFER: {apartment.city} – {apartment.title}\n"
-        f"Miete: {rent}\n"
-        f"Zimmer: {rooms}\n"
-        f"Score: {apartment_match.score}/100\n"
-        f"Link: {apartment.url}\n\n"
-        f"Bewertung:\n{reasons}"
+        f"{tr(language, 'notifier.new_match', city=apartment.city, title=apartment.title)}\n"
+        f"{tr(language, 'notifier.rent', rent=rent)}\n"
+        f"{tr(language, 'notifier.rooms', rooms=rooms)}\n"
+        f"{tr(language, 'notifier.score', score=apartment_match.score)}\n"
+        f"{tr(language, 'notifier.link', url=apartment.url)}\n\n"
+        f"{tr(language, 'notifier.evaluation', reasons=reasons)}"
     )
 
 
 class Notifier:
     """Send apartment matches to the configured notification channels."""
 
-    def __init__(self, config: dict[str, Any]) -> None:
+    def __init__(self, config: dict[str, Any], language: str = "en") -> None:
         """Store notification configuration for Telegram and email delivery."""
         self.config = config
+        self.language = language
 
     def send(self, apartment_match: ApartmentMatch) -> None:
-        message = format_match(apartment_match)
+        message = format_match(apartment_match, self.language)
         LOGGER.info("Notification prepared for %s", apartment_match.apartment.title)
         LOGGER.debug("Notification body:\n%s", message)
         self._send_telegram(message)

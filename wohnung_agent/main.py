@@ -4,7 +4,7 @@ import argparse
 import logging
 from apscheduler.schedulers.blocking import BlockingScheduler
 from wohnung_agent.adapters.demo_adapter import DemoAdapter
-from wohnung_agent.config_loader import load_config, load_database_path, load_search_profile
+from wohnung_agent.config_loader import load_config, load_database_path, load_language, load_search_profile
 from wohnung_agent.database import ApartmentDatabase
 from wohnung_agent.filter_engine import FilterEngine
 from wohnung_agent.notifier import Notifier
@@ -16,6 +16,7 @@ LOGGER = logging.getLogger(__name__)
 def build_runner(config_path: str) -> ApartmentSearchRunner:
     """Create a fully configured runner from the YAML configuration."""
     config = load_config(config_path)
+    language = load_language(config)
     profile = load_search_profile(config)
 
     adapters = []
@@ -32,6 +33,7 @@ def build_runner(config_path: str) -> ApartmentSearchRunner:
                     search_urls=immowelt_config.get("search_urls", []),
                     timeout_ms=immowelt_config.get("timeout_ms", 20_000),
                     throttle_seconds=immowelt_config.get("throttle_seconds", 2.0),
+                    language=language,
                 )
             )
         except ImportError:
@@ -41,15 +43,16 @@ def build_runner(config_path: str) -> ApartmentSearchRunner:
     if not adapters:
         raise ValueError("No adapters enabled. Enable demo or immowelt in the config file.")
 
-    filter_engine = FilterEngine(profile)
+    filter_engine = FilterEngine(profile, language=language)
     database = ApartmentDatabase(load_database_path(config))
-    notifier = Notifier(config)
+    notifier = Notifier(config, language=language)
 
     return ApartmentSearchRunner(
         adapters=adapters,
         filter_engine=filter_engine,
         database=database,
         notifier=notifier,
+        language=language,
     )
 
 

@@ -45,10 +45,13 @@ class ImmoweltAdapter(ApartmentAdapter):
         search_urls: list[str | dict[str, str]],
         timeout_ms: int = 20_000,
         throttle_seconds: float = 2.0,
+        language: str = "en",
     ) -> None:
+        """Configure URL inputs, network timing, and output language."""
         self.search_urls = [self._normalize_search_url(item) for item in search_urls]
         self.timeout_ms = timeout_ms
         self.throttle_seconds = throttle_seconds
+        self.language = language
         self._headers = {
             "User-Agent": (
                 "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
@@ -59,6 +62,7 @@ class ImmoweltAdapter(ApartmentAdapter):
         }
 
     def search(self, profile: SearchProfile) -> list[Apartment]:
+        """Fetch configured search pages and extract apartment cards."""
         apartments: list[Apartment] = []
 
         if not self.search_urls:
@@ -98,6 +102,7 @@ class ImmoweltAdapter(ApartmentAdapter):
         search_url: ImmoweltSearchUrl,
         profile: SearchProfile,
     ) -> list[Apartment]:
+        """Parse one result page and map listing cards to Apartment models."""
         soup = BeautifulSoup(html, "html.parser")
         expose_links = self._find_expose_links(soup, search_url.url)
         apartments: list[Apartment] = []
@@ -116,7 +121,12 @@ class ImmoweltAdapter(ApartmentAdapter):
                     external_id=stable_id_from_url(absolute_url),
                     title=title,
                     url=absolute_url,
-                    city=detect_city(card_text, profile.regions, fallback=search_url.city_hint),
+                    city=detect_city(
+                        card_text,
+                        profile.regions,
+                        fallback=search_url.city_hint,
+                        language=self.language,
+                    ),
                     warm_rent_eur=parse_warm_rent(card_text),
                     rooms=parse_rooms(card_text),
                     living_area_sqm=parse_living_area(card_text),
@@ -128,6 +138,7 @@ class ImmoweltAdapter(ApartmentAdapter):
         return apartments
 
     def _find_expose_links(self, soup: BeautifulSoup, base_url: str) -> list[tuple[Any, str]]:
+        """Find unique expose detail links on a result page."""
         result: list[tuple[Any, str]] = []
         seen_urls: set[str] = set()
 
@@ -147,6 +158,7 @@ class ImmoweltAdapter(ApartmentAdapter):
         return result
 
     def _find_card_container(self, link_element: Any) -> Any | None:
+        """Walk parent nodes to locate the listing card around a link."""
         current = link_element
         for _ in range(8):
             current = current.parent
@@ -160,6 +172,7 @@ class ImmoweltAdapter(ApartmentAdapter):
         return link_element.parent
 
     def _extract_title(self, link_element: Any, card_text: str) -> str:
+        """Extract the best available listing title from link or heading text."""
         direct_text = " ".join(link_element.get_text(" ", strip=True).split())
         if len(direct_text) >= 12:
             return direct_text[:180]
@@ -172,12 +185,14 @@ class ImmoweltAdapter(ApartmentAdapter):
         return card_text[:120]
 
     def _deduplicate(self, apartments: list[Apartment]) -> list[Apartment]:
+        """Remove duplicates based on apartment unique key."""
         deduplicated: dict[str, Apartment] = {}
         for apartment in apartments:
             deduplicated[apartment.unique_key] = apartment
         return list(deduplicated.values())
 
     def _normalize_search_url(self, item: str | dict[str, str]) -> ImmoweltSearchUrl:
+        """Normalize URL config items from string or mapping input."""
         if isinstance(item, str):
             return ImmoweltSearchUrl(url=item)
         return ImmoweltSearchUrl(url=item["url"], city_hint=item.get("city_hint"))

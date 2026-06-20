@@ -8,6 +8,11 @@ regions:
   - Boizenburg
   - Lüneburg
 
+# Optional language selection.
+# Supported: en, de
+# If omitted, system locale is used. Fallback is en.
+language: en
+
 demo:
   enabled: false
 

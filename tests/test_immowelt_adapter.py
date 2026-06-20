@@ -6,6 +6,9 @@ and behaves correctly with different config combinations.
 """
 
 from wohnung_agent.models import SearchProfile
+from bs4 import BeautifulSoup
+import requests
+from unittest.mock import MagicMock, patch
 
 
 def test_immowelt_adapter_respects_config_parameters():
@@ -82,3 +85,95 @@ def test_immowelt_adapter_has_source_name():
 
     adapter = ImmoweltAdapter(search_urls=[])
     assert adapter.source_name == "immowelt"
+
+
+def test_find_expose_links_and_deduplicate():
+    from wohnung_agent.adapters.immowelt_adapter import ImmoweltAdapter
+
+    adapter = ImmoweltAdapter(search_urls=[])
+    soup = BeautifulSoup(
+        '<a href="/expose/123">One</a><a href="/expose/123#foo">Dup</a><a href="/other">Skip</a>',
+        "html.parser",
+    )
+
+    links = adapter._find_expose_links(soup, "https://example.immowelt.de")
+    assert len(links) == 1
+    assert links[0][1].endswith("/expose/123")
+
+
+def test_extract_title_and_card_container_helpers():
+    from wohnung_agent.adapters.immowelt_adapter import ImmoweltAdapter
+
+    adapter = ImmoweltAdapter(search_urls=[])
+    soup = BeautifulSoup(
+        '<div><article><h2>Sehr schoene Wohnung mit Balkon</h2><a href="/expose/1">Details</a> 750 € 3 Zimmer</article></div>',
+        "html.parser",
+    )
+    link = soup.find("a")
+    assert link is not None
+
+    card = adapter._find_card_container(link)
+    assert card is not None
+
+    title = adapter._extract_title(link, "Fallback card text")
+    assert isinstance(title, str)
+    assert len(title) > 0
+
+
+def test_parse_html_extracts_apartment():
+    from wohnung_agent.adapters.immowelt_adapter import ImmoweltAdapter, ImmoweltSearchUrl
+
+    adapter = ImmoweltAdapter(search_urls=[], language="en")
+    profile = SearchProfile(
+        max_warm_rent=800,
+        min_rooms=2.5,
+        kitchen_required=True,
+        regions=["Boizenburg"],
+    )
+
+    html = (
+        '<article><a href="/expose/987654">'
+        '<h2>Apartment title with balcony</h2>'
+        'Boizenburg 750 € 3 Zimmer 68 m² Einbauküche'
+        "</a></article>"
+    )
+
+    result = adapter._parse_html(
+        html,
+        ImmoweltSearchUrl(url="https://example.immowelt.de/search", city_hint="Boizenburg"),
+        profile,
+    )
+    assert len(result) == 1
+    assert result[0].city == "Boizenburg"
+    assert result[0].rooms == 3
+
+
+def test_search_handles_request_exception_without_crash():
+    from wohnung_agent.adapters.immowelt_adapter import ImmoweltAdapter
+
+    adapter = ImmoweltAdapter(search_urls=["https://example.immowelt.de/search"])
+    profile = SearchProfile(
+        max_warm_rent=800,
+        min_rooms=2.5,
+        kitchen_required=True,
+        regions=["Boizenburg"],
+    )
+
+    session_instance = MagicMock()
+    session_instance.get.side_effect = requests.RequestException("boom")
+
+    with patch("wohnung_agent.adapters.immowelt_adapter.requests.Session", return_value=session_instance):
+        result = adapter.search(profile)
+    assert result == []
+
+
+def test_extract_title_uses_card_fallback_when_link_text_short():
+    from wohnung_agent.adapters.immowelt_adapter import ImmoweltAdapter
+
+    adapter = ImmoweltAdapter(search_urls=[])
+    soup = BeautifulSoup('<a href="/expose/1">Mehr</a>', "html.parser")
+    link = soup.find("a")
+    assert link is not None
+
+    title = adapter._extract_title(link, "Card fallback title text")
+    assert title.startswith("Card fallback")

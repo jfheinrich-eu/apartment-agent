@@ -5,7 +5,7 @@ Verifies that the runner correctly orchestrates the search workflow
 using the contract: adapter.search(profile) -> list[Apartment]
 """
 
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
 from wohnung_agent.adapters.demo_adapter import DemoAdapter
 from wohnung_agent.database import ApartmentDatabase
