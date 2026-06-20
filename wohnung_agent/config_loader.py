@@ -7,6 +7,7 @@ from wohnung_agent.models import SearchProfile
 
 
 def load_config(config_path: str | Path) -> dict[str, Any]:
+    """Load and validate the YAML configuration file."""
     resolved = Path(config_path).resolve()
     if not resolved.is_file():
         raise FileNotFoundError(f"Config file not found: {resolved}")
@@ -18,6 +19,7 @@ def load_config(config_path: str | Path) -> dict[str, Any]:
 
 
 def load_search_profile(config: dict[str, Any]) -> SearchProfile:
+    """Build the typed search profile from top-level config values."""
     return SearchProfile(
         max_warm_rent=config["max_warm_rent"],
         min_rooms=config["min_rooms"],
@@ -27,4 +29,5 @@ def load_search_profile(config: dict[str, Any]) -> SearchProfile:
 
 
 def load_database_path(config: dict[str, Any]) -> str:
+    """Return the configured database path or the default SQLite file."""
     return str(config.get("database_path", "wohnungen.sqlite3"))

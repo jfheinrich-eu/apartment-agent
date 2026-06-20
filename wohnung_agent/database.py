@@ -6,13 +6,17 @@ from wohnung_agent.models import Apartment, ApartmentMatch
 
 
 class ApartmentDatabase:
+    """Persist apartment matches in SQLite."""
+
     def __init__(self, database_path: str | Path = "wohnungen.sqlite3") -> None:
+        """Open a database connection and initialize the schema."""
         self.database_path = Path(database_path).resolve()
         self.connection = sqlite3.connect(self.database_path)
         self.connection.row_factory = sqlite3.Row
         self._create_schema()
 
     def _create_schema(self) -> None:
+        """Create the apartments table if it does not exist yet."""
         self.connection.execute(
             """
             CREATE TABLE IF NOT EXISTS apartments (
@@ -38,6 +42,7 @@ class ApartmentDatabase:
         self.connection.commit()
 
     def exists(self, apartment: Apartment) -> bool:
+        """Return True when an apartment with the same unique key already exists."""
         cursor = self.connection.execute(
             "SELECT 1 FROM apartments WHERE unique_key = ?",
             (apartment.unique_key,),
@@ -45,6 +50,7 @@ class ApartmentDatabase:
         return cursor.fetchone() is not None
 
     def save_match(self, apartment_match: ApartmentMatch) -> bool:
+        """Insert or update a scored apartment match and return whether it was new."""
         apartment = apartment_match.apartment
         is_new = not self.exists(apartment)
 
@@ -83,10 +89,13 @@ class ApartmentDatabase:
         return is_new
 
     def close(self) -> None:
+        """Close the SQLite connection."""
         self.connection.close()
 
     def __enter__(self) -> ApartmentDatabase:
+        """Return the database instance for use in a context manager."""
         return self
 
     def __exit__(self, exc_type, exc_value, exc_traceback) -> None:
+        """Close the database connection when leaving a context manager."""
         self.close()

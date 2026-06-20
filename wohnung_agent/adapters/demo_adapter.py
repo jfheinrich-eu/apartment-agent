@@ -5,10 +5,12 @@ from wohnung_agent.models import Apartment, SearchProfile
 
 
 class DemoAdapter(ApartmentAdapter):
+    """Return deterministic sample apartments for development and tests."""
+
     source_name = "demo"
 
     def search(self, profile: SearchProfile) -> list[Apartment]:
-        # Replace this adapter with real source adapters.
+        """Return a stable demo dataset independent of the search profile."""
         return [
             Apartment(
                 source=self.source_name,

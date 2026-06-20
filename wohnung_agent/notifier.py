@@ -28,7 +28,10 @@ def format_match(apartment_match: ApartmentMatch) -> str:
 
 
 class Notifier:
+    """Send apartment matches to the configured notification channels."""
+
     def __init__(self, config: dict[str, Any]) -> None:
+        """Store notification configuration for Telegram and email delivery."""
         self.config = config
 
     def send(self, apartment_match: ApartmentMatch) -> None:

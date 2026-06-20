@@ -11,13 +11,7 @@ LOGGER = logging.getLogger(__name__)
 
 
 class ApartmentSearchRunner:
-    """
-    Orchestrates the apartment search workflow:
-    1. Fetch apartments from all adapters using adapter.search(profile)
-    2. Evaluate each apartment using the filter engine
-    3. Check for duplicates in the database
-    4. Save new matches and notify if configured
-    """
+    """Coordinate adapters, scoring, persistence, and notifications."""
 
     def __init__(
         self,
@@ -26,6 +20,7 @@ class ApartmentSearchRunner:
         database: ApartmentDatabase,
         notifier: Notifier,
     ) -> None:
+        """Store the dependencies that drive a single search cycle."""
         self.adapters = adapters
         self.filter_engine = filter_engine
         self.database = database

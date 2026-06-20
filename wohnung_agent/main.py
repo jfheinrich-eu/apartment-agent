@@ -14,6 +14,7 @@ LOGGER = logging.getLogger(__name__)
 
 
 def build_runner(config_path: str) -> ApartmentSearchRunner:
+    """Create a fully configured runner from the YAML configuration."""
     config = load_config(config_path)
     profile = load_search_profile(config)
 
@@ -53,6 +54,7 @@ def build_runner(config_path: str) -> ApartmentSearchRunner:
 
 
 def main() -> None:
+    """Run the command-line interface for the apartment search agent."""
     parser = argparse.ArgumentParser(description="Apartment search agent")
     parser.add_argument("--config", default="config/search_profile.yml")
     parser.add_argument("--once", action="store_true", help="Run once and exit")
