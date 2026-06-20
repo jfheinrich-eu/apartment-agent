@@ -93,6 +93,40 @@ wohnung-agent --config config/search_profile.yml
 wohnung-agent --config config/search_profile.yml --interval-minutes 30
 ```
 
+### Report open apartments (markdown)
+
+Print all open apartments (non-rejected, seen within last 7 days):
+
+```bash
+wohnung-agent --config config/search_profile.yml --report-open
+```
+
+Use a custom open-window in days:
+
+```bash
+wohnung-agent --config config/search_profile.yml --report-open --open-days 14
+```
+
+Write report to markdown file (still prints to console):
+
+```bash
+wohnung-agent --config config/search_profile.yml --report-open --report-output open_apartments.md
+```
+
+### Delete unavailable apartments
+
+Delete one apartment by unique key:
+
+```bash
+wohnung-agent --config config/search_profile.yml --delete-key immowelt:123456
+```
+
+Delete all apartments that were last seen more than N days ago:
+
+```bash
+wohnung-agent --config config/search_profile.yml --delete-older-than-days 30
+```
+
 ## Using make
 
 Convenient commands via Makefile:
