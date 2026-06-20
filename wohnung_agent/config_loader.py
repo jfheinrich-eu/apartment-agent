@@ -7,7 +7,10 @@ from wohnung_agent.models import SearchProfile
 
 
 def load_config(config_path: str | Path) -> dict[str, Any]:
-    with Path(config_path).open("r", encoding="utf-8") as config_file:
+    resolved = Path(config_path).resolve()
+    if not resolved.is_file():
+        raise FileNotFoundError(f"Config file not found: {resolved}")
+    with resolved.open("r", encoding="utf-8") as config_file:
         config = yaml.safe_load(config_file)
     if not isinstance(config, dict):
         raise ValueError("Config file must contain a YAML object.")

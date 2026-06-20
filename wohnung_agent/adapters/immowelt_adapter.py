@@ -70,10 +70,13 @@ class ImmoweltAdapter(ApartmentAdapter):
         for search_url in self.search_urls:
             try:
                 LOGGER.info("Loading Immowelt search URL: %s", search_url.url)
-                response = requests.get(
+                session = requests.Session()
+                session.max_redirects = 5
+                response = session.get(
                     search_url.url,
                     headers=self._headers,
                     timeout=max(1.0, self.timeout_ms / 1000.0),
+                    allow_redirects=True,
                 )
                 response.raise_for_status()
                 apartments.extend(self._parse_html(response.text, search_url, profile))

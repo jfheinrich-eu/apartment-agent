@@ -1,10 +1,14 @@
 from __future__ import annotations
 
+import logging
 import smtplib
+import ssl
 from email.message import EmailMessage
 from typing import Any
 import requests
 from wohnung_agent.models import ApartmentMatch
+
+LOGGER = logging.getLogger(__name__)
 
 
 def format_match(apartment_match: ApartmentMatch) -> str:
@@ -38,8 +42,13 @@ class Notifier:
         if not telegram_config.get("enabled"):
             return
 
-        bot_token = telegram_config["bot_token"]
-        chat_id = telegram_config["chat_id"]
+        bot_token = telegram_config.get("bot_token", "")
+        chat_id = telegram_config.get("chat_id", "")
+        if not bot_token or not chat_id:
+            LOGGER.error("Telegram notification enabled but bot_token or chat_id is missing.")
+            return
+
+        LOGGER.info("Sending Telegram notification")
         response = requests.post(
             f"https://api.telegram.org/bot{bot_token}/sendMessage",
             json={"chat_id": chat_id, "text": message},
@@ -52,13 +61,25 @@ class Notifier:
         if not email_config.get("enabled"):
             return
 
+        smtp_host = email_config.get("smtp_host", "")
+        smtp_port = email_config.get("smtp_port", 587)
+        username = email_config.get("username", "")
+        password = email_config.get("password", "")
+        recipient = email_config.get("recipient", "")
+
+        if not smtp_host or not username or not password or not recipient:
+            LOGGER.error("Email notification enabled but required fields (smtp_host, username, password, recipient) are missing.")
+            return
+
         email_message = EmailMessage()
-        email_message["From"] = email_config["username"]
-        email_message["To"] = email_config["recipient"]
+        email_message["From"] = username
+        email_message["To"] = recipient
         email_message["Subject"] = "Neuer Wohnungstreffer"
         email_message.set_content(message)
 
-        with smtplib.SMTP(email_config["smtp_host"], email_config["smtp_port"]) as smtp:
-            smtp.starttls()
-            smtp.login(email_config["username"], email_config["password"])
+        tls_context = ssl.create_default_context()
+        LOGGER.info("Sending email notification to %s via %s", recipient, smtp_host)
+        with smtplib.SMTP(smtp_host, smtp_port) as smtp:
+            smtp.starttls(context=tls_context)
+            smtp.login(username, password)
             smtp.send_message(email_message)
