@@ -11,6 +11,9 @@ dependencies = [
     "APScheduler>=3.10.4",
 ]
 
+[project.optional-dependencies]
+dev = ["pytest>=8.0.0", "black>=24.0.0", "build>=1.0.0"]
+
 [project.scripts]
 wohnung-agent = "wohnung_agent.main:main"
 
