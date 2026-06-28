@@ -49,17 +49,28 @@ jobs:
     name: Auto Review by Bot
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    if: |
+      (
+        github.event_name == 'workflow_dispatch' ||
+        github.event_name == 'pull_request' ||
+        (github.event_name == 'check_suite' && github.event.check_suite.conclusion == 'success') ||
+        (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success')
+      ) &&
+      secrets.BOT_TOKEN != ''
     env:
-      GH_TOKEN: ${{ secrets.BOT_TOKEN || secrets.GITHUB_TOKEN }}
+      GH_TOKEN: ${{ secrets.BOT_TOKEN }}
+      BOT_REVIEWER_LOGIN: jfheinrich-bot
     defaults:
       run:
         shell: bash
-    if: |
-      github.event_name == 'workflow_dispatch' ||
-      github.event_name == 'pull_request' ||
-      (github.event_name == 'check_suite' && github.event.check_suite.conclusion == 'success') ||
-      (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success')
     steps:
+      - name: Validate BOT token availability
+        run: |
+          if [[ -z "${GH_TOKEN:-}" ]]; then
+            echo "BOT_TOKEN is not configured; cannot submit review as jfheinrich-bot."
+            exit 1
+          fi
+
       - name: Checkout repository
         uses: actions/checkout@v5
         with:
