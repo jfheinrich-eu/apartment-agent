@@ -12,7 +12,7 @@ on:
   check_suite:
     types: [completed]
   workflow_run:
-    workflows: ["CI", "Security"]
+    workflows: ["CI", "Security", "CodeQL"]
     types: [completed]
 
 permissions:
@@ -98,6 +98,8 @@ jobs:
         if: |
           steps.check-status.outputs.can_review == 'true' &&
           steps.check-reviewed.outputs.already_reviewed == 'false'
+        env:
+          GITHUB_REPOSITORY: ${{ github.repository }}
         run: .github/scripts/add-review-label.sh "${{ steps.get-pr.outputs.pr_number }}"
 
       - name: Handle errors gracefully
