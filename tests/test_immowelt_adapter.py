@@ -5,10 +5,12 @@ Verifies that the adapter respects configuration parameters
 and behaves correctly with different config combinations.
 """
 
-from wohnung_agent.models import SearchProfile
 from bs4 import BeautifulSoup
+import pytest
 import requests
 from unittest.mock import MagicMock, patch
+
+from wohnung_agent.models import SearchProfile
 
 
 def test_immowelt_adapter_respects_config_parameters():
@@ -34,6 +36,22 @@ def test_immowelt_adapter_respects_config_parameters():
     assert len(adapter.search_urls) == 1
     assert adapter.search_urls[0].url == "https://example.immowelt.de/search"
     assert adapter.search_urls[0].city_hint == "Boizenburg"
+
+
+@pytest.mark.parametrize(
+    ("kwargs", "expected_message"),
+    [
+        ({"timeout_ms": 0}, "timeout_ms must be positive"),
+        ({"timeout_ms": "1000"}, "timeout_ms must be a positive number"),
+        ({"throttle_seconds": -1}, "throttle_seconds must be non-negative"),
+        ({"throttle_seconds": "fast"}, "throttle_seconds must be a non-negative number"),
+    ],
+)
+def test_immowelt_adapter_rejects_invalid_timing_configuration(kwargs, expected_message):
+    from wohnung_agent.adapters.immowelt_adapter import ImmoweltAdapter
+
+    with pytest.raises(ValueError, match=expected_message):
+        ImmoweltAdapter(search_urls=[], **kwargs)
 
 
 def test_immowelt_adapter_with_empty_urls():

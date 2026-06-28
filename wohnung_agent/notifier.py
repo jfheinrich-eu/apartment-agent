@@ -55,7 +55,8 @@ class Notifier:
             LOGGER.error("Telegram notification enabled but bot_token or chat_id is missing.")
             return
 
-        LOGGER.info("Sending Telegram notification to chat %s", chat_id)
+        LOGGER.info("Sending Telegram notification")
+        LOGGER.debug("Telegram target chat_id=%s", chat_id)
         try:
             response = requests.post(
                 f"https://api.telegram.org/bot{bot_token}/sendMessage",
@@ -65,11 +66,11 @@ class Notifier:
             response.raise_for_status()
             LOGGER.info("Telegram notification sent successfully")
         except requests.Timeout as error:
-            LOGGER.warning("Telegram request timeout for chat %s: %s", chat_id, error)
+            LOGGER.warning("Telegram request timeout: %s", error)
         except requests.ConnectionError as error:
-            LOGGER.warning("Telegram connection error for chat %s: %s", chat_id, error)
+            LOGGER.warning("Telegram connection error: %s", error)
         except requests.RequestException as error:
-            LOGGER.exception("Telegram notification failed for chat %s: %s", chat_id, error)
+            LOGGER.exception("Telegram notification failed: %s", error)
 
     def _send_email(self, message: str) -> None:
         email_config = self.config.get("email", {})
@@ -101,7 +102,13 @@ class Notifier:
                 smtp.send_message(email_message)
             LOGGER.info("Email notification sent successfully to %s", recipient)
         except smtplib.SMTPAuthenticationError as error:
-            LOGGER.error("Email authentication failed for %s: invalid credentials for %s", recipient, username)
+            LOGGER.error(
+                "Email authentication failed for %s via %s:%d: %s",
+                recipient,
+                smtp_host,
+                smtp_port,
+                error,
+            )
         except smtplib.SMTPException as error:
             LOGGER.exception("Email SMTP error for %s via %s: %s", recipient, smtp_host, error)
         except OSError as error:
