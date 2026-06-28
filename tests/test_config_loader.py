@@ -77,6 +77,18 @@ def test_load_config_raises_for_invalid_smtp_port(tmp_path):
         load_config(config_path)
 
 
+def test_load_config_raises_for_non_numeric_smtp_port(tmp_path):
+    """Test that load_config reports a clear error for non-numeric smtp_port values."""
+    config_path = tmp_path / "bad_smtp_port_type.yml"
+    config_path.write_text(
+        "max_warm_rent: 800\nmin_rooms: 2.5\nregions:\n  - Boizenburg\n"
+        "email:\n  smtp_port: not-a-number\n",
+        encoding="utf-8",
+    )
+    with pytest.raises(ValueError, match="smtp_port must be a numeric value"):
+        load_config(config_path)
+
+
 def test_load_config_raises_for_invalid_immowelt_timeout(tmp_path):
     """Test that load_config validates immowelt timeout_ms > 0."""
     config_path = tmp_path / "bad_timeout.yml"
@@ -113,6 +125,28 @@ def test_load_language_from_app_config():
         language="de",
     )
     assert load_language(config) == "de"
+
+
+def test_load_language_uses_locale_fallback_when_not_explicitly_set():
+    """Test that omitted language falls back to locale resolution."""
+    config = AppConfig(
+        max_warm_rent=800,
+        min_rooms=2.5,
+        regions=["Boizenburg"],
+    )
+    with patch("wohnung_agent.config_loader.resolve_language", return_value="de"):
+        assert load_language(config) == "de"
+
+
+def test_load_config_normalizes_language_values(tmp_path):
+    """Test that language values are normalized for whitespace and case."""
+    config_path = tmp_path / "language_normalized.yml"
+    config_path.write_text(
+        "max_warm_rent: 800\nmin_rooms: 2.5\nregions:\n  - Boizenburg\nlanguage: \" DE \"\n",
+        encoding="utf-8",
+    )
+    loaded = load_config(config_path)
+    assert loaded.language == "de"
 
 
 def test_load_language_defaults_to_en():

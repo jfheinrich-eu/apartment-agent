@@ -49,7 +49,7 @@ def load_database_path(config: AppConfig) -> str:
 
 def load_language(config: AppConfig) -> str:
     """Resolve UI language from config, then system locale, then English fallback."""
-    # Use config value directly if set, otherwise fall back to locale resolution
-    if config.language and config.language in ("en", "de"):
+    # Respect explicit config language; otherwise reuse locale fallback behavior.
+    if "language" in config.model_fields_set:
         return config.language
     return resolve_language({})

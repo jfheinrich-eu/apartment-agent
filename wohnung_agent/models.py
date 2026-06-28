@@ -120,7 +120,10 @@ class EmailConfig(BaseModel):
     def validate_smtp_port(cls, v) -> int:
         """Ensure SMTP port is within valid range."""
         if isinstance(v, str):
-            v = int(v)
+            try:
+                v = int(v)
+            except ValueError as error:
+                raise ValueError("smtp_port must be a numeric value") from error
         if not 1 <= v <= 65535:
             raise ValueError(f"SMTP port must be between 1 and 65535, got {v}")
         return v
@@ -174,6 +177,7 @@ class AppConfig(BaseModel):
     @classmethod
     def validate_language(cls, v: str) -> str:
         """Normalize language code."""
-        if v not in ("en", "de"):
+        normalized = v.strip().lower()
+        if normalized not in ("en", "de"):
             raise ValueError(f"language must be 'en' or 'de', got '{v}'")
-        return v
+        return normalized
