@@ -1,0 +1,22 @@
+# CODEOWNERS - Define code ownership and require reviews
+
+# Default owners for everything
+* @jfheinrich
+
+# Adapter implementations
+/wohnung_agent/adapters/ @jfheinrich
+
+# Configuration and loading
+/wohnung_agent/config_loader.py @jfheinrich
+/config/ @jfheinrich
+
+# Database and persistence
+/wohnung_agent/database.py @jfheinrich
+
+# Tests
+/tests/ @jfheinrich
+
+# CI/CD and Governance
+/.github/ @jfheinrich
+/pyproject.toml @jfheinrich
+/Makefile @jfheinrich

@@ -4,10 +4,10 @@ import logging
 import time
 from dataclasses import dataclass
 from numbers import Real
-from typing import Any
+from typing import Any, cast
 from urllib.parse import urljoin
 
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, Tag
 import requests
 
 from wohnung_agent.adapters.base import ApartmentAdapter
@@ -19,7 +19,7 @@ from wohnung_agent.adapters.text_parsing import (
     parse_warm_rent,
     stable_id_from_url,
 )
-from wohnung_agent.models import Apartment, SearchProfile
+from wohnung_agent.models import Apartment, HttpUrl, SearchProfile
 
 LOGGER = logging.getLogger(__name__)
 
@@ -39,7 +39,12 @@ class ImmoweltAdapter(ApartmentAdapter):
     to guess the internal search URL format.
     """
 
-    source_name = "immowelt"
+    source_name: str = "immowelt"
+    search_urls: list[ImmoweltSearchUrl]
+    timeout_ms: int
+    throttle_seconds: float
+    language: str
+    _headers: dict[str, str]
 
     def __init__(
         self,
@@ -132,7 +137,7 @@ class ImmoweltAdapter(ApartmentAdapter):
                     source=self.source_name,
                     external_id=stable_id_from_url(absolute_url),
                     title=title,
-                    url=absolute_url,
+                    url=cast(HttpUrl, absolute_url),
                     city=detect_city(
                         card_text,
                         profile.regions,
@@ -155,7 +160,10 @@ class ImmoweltAdapter(ApartmentAdapter):
         seen_urls: set[str] = set()
 
         for link_element in soup.find_all("a", href=True):
-            href = str(link_element["href"])
+            if not isinstance(link_element, Tag):
+                continue
+
+            href = str(link_element.get("href", ""))
             normalized_href = href.casefold()
             if not any(marker in normalized_href for marker in ("expose", "exposé", "/expose/")):
                 continue

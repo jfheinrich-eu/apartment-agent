@@ -1,5 +1,10 @@
 # Wohnung Agent v1
 
+[![CI](https://github.com/jfheinrich-eu/apartment-agent/actions/workflows/ci.yml/badge.svg)](https://github.com/jfheinrich-eu/apartment-agent/actions/workflows/ci.yml)
+[![Security](https://github.com/jfheinrich-eu/apartment-agent/actions/workflows/security.yml/badge.svg)](https://github.com/jfheinrich-eu/apartment-agent/actions/workflows/security.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
+
 A personal apartment search agent with adapter architecture, SQLite database, and notifications.
 
 ## Installation
@@ -173,3 +178,53 @@ make test
 ```
 
 Python 3.11+, all dependencies in `pyproject.toml`.
+
+### Testing Locally
+
+```bash
+# Install development dependencies
+pip install -e ".[dev]"
+
+# Run all tests
+make test
+
+# Run with coverage
+pytest --cov=wohnung_agent tests/
+
+# Lint with flake8
+flake8 wohnung_agent tests --max-line-length=100
+```
+
+### Adding a New Adapter
+
+1. Create a new file in `wohnung_agent/adapters/` (e.g., `my_portal_adapter.py`)
+2. Extend `ApartmentAdapter` from `base.py`
+3. Implement the `search()` method
+4. Add tests in `tests/test_my_portal_adapter.py`
+5. Update config schema and documentation
+
+## Contributing
+
+Contributions are welcome! Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduct, development process, and how to submit pull requests.
+
+**Quick start:**
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Make your changes and add tests
+4. Run tests: `make test`
+5. Submit a pull request
+
+## Security
+
+For security vulnerabilities, please refer to [SECURITY.md](SECURITY.md). Do not open public issues for security concerns.
+
+## License
+
+This project is licensed under the MIT License - see [LICENSE](LICENSE) file for details.
+
+## Support
+
+- 📖 [README](README.md) - Project overview and usage
+- 🛠️ [CONTRIBUTING.md](CONTRIBUTING.md) - Development guidelines
+- 🔒 [SECURITY.md](SECURITY.md) - Security policy and vulnerability reporting
+- 📝 [Issues](https://github.com/jfheinrich-eu/apartment-agent/issues) - Bug reports and feature requests

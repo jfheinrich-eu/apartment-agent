@@ -2,6 +2,20 @@
 name = "wohnung-agent"
 version = "0.1.0"
 description = "Personal apartment search agent"
+readme = "README.md"
+license = {text = "MIT"}
+authors = [
+    {name = "Jörg", email = "jfheinrich@users.noreply.github.com"}
+]
+keywords = [
+    "apartment",
+    "real-estate",
+    "search",
+    "automation",
+    "notifications",
+    "immobilien",
+    "wohnung"
+]
 requires-python = ">=3.11"
 dependencies = [
     "requests>=2.32.0",
@@ -11,8 +25,24 @@ dependencies = [
     "APScheduler>=3.10.4",
 ]
 
+[project.urls]
+Repository = "https://github.com/jfheinrich-eu/apartment-agent"
+Homepage = "https://github.com/jfheinrich-eu/apartment-agent"
+Documentation = "https://github.com/jfheinrich-eu/apartment-agent/blob/main/README.md"
+Issues = "https://github.com/jfheinrich-eu/apartment-agent/issues"
+Changelog = "https://github.com/jfheinrich-eu/apartment-agent/releases"
+
 [project.optional-dependencies]
-dev = ["pytest>=8.0.0", "pytest-cov>=5.0.0", "black>=24.0.0", "build>=1.0.0"]
+dev = [
+    "pytest>=8.0.0",
+    "pytest-cov>=5.0.0",
+    "black>=24.0.0",
+    "flake8>=7.0.0",
+    "mypy>=1.8.0",
+    "bandit>=1.7.5",
+    "pip-audit>=2.6.0",
+    "build>=1.0.0"
+]
 
 [project.scripts]
 wohnung-agent = "wohnung_agent.main:main"
