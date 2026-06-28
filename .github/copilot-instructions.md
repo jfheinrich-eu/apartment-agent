@@ -14,6 +14,16 @@ Python 3.11+ apartment search agent. Adapter-based architecture:
 Dependencies: `requests`, `beautifulsoup4`, `pydantic`, `PyYAML`, `APScheduler`.  
 All code is in **English** (variable names, function names, comments, docstrings).
 
+## Commit message convention
+
+- Use **Conventional Commits** for every new commit and when rewriting existing commit messages.
+- Format: `<type>(<scope>): <summary>`.
+- Preferred types in this repository: `feat`, `fix`, `refactor`, `test`, `docs`, `chore`, `ci`.
+- Keep the summary imperative, specific, and in English.
+- Examples:
+   - `fix(runtime): harden notifier and adapter error handling`
+   - `docs(github): add contribution and security guidance`
+
 ---
 
 ## Custom commands
