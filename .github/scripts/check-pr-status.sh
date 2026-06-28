@@ -56,7 +56,7 @@ while true; do
   CHECKS_JSON=$(gh pr checks "$PR_NUMBER" --json name,state,bucket,workflow 2>/dev/null || echo "[]")
 
   # Exclude this workflow's own checks to prevent self-pending loops.
-  EXTERNAL_CHECKS=$(echo "$CHECKS_JSON" | jq '[.[] | select(.workflow != "Auto Request Reviews" and .name != "Auto Review by Bot" and .name != "request-review")]')
+  EXTERNAL_CHECKS=$(echo "$CHECKS_JSON" | jq '[.[] | select(.workflow != "Auto Request and Automated Review" and .name != "Auto Review by Bot" and .name != "request-review")]')
   TOTAL_EXTERNAL=$(echo "$EXTERNAL_CHECKS" | jq 'length')
   PASSING_CHECKS=$(echo "$EXTERNAL_CHECKS" | jq '[.[] | select(.bucket == "pass")] | length')
   PENDING_CHECKS=$(echo "$EXTERNAL_CHECKS" | jq '[.[] | select(.bucket == "pending")] | length')
