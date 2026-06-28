@@ -29,6 +29,10 @@ jobs:
       
       - name: Run tests
         run: make test
+
+      - name: Generate coverage XML
+        if: matrix.python-version == '3.11'
+        run: pytest --cov=wohnung_agent --cov-report=xml tests/
       
       - name: Upload coverage reports
         if: matrix.python-version == '3.11'
@@ -83,5 +87,3 @@ jobs:
       
       - name: Type check with mypy
         run: mypy wohnung_agent --ignore-missing-imports --no-implicit-optional
-        if: always()
-        continue-on-error: true

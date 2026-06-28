@@ -16,9 +16,9 @@ updates:
     pull-request-branch-name:
       separator: "/"
     reviewers:
-      - "joerg"
+      - "jfheinrich"
     assignees:
-      - "joerg"
+      - "jfheinrich"
     labels:
       - "dependencies"
       - "automated"

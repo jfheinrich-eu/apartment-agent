@@ -2,7 +2,9 @@
 
 ## Reporting Security Vulnerabilities
 
-If you discover a security vulnerability in Wohnung Agent, please report it responsibly by emailing `security@example.com` instead of using the public issue tracker.
+If you discover a security vulnerability in Wohnung Agent, please use GitHub's private vulnerability reporting flow for this repository:
+
+https://github.com/jfheinrich-eu/apartment-agent/security/advisories/new
 
 **Please do not disclose security vulnerabilities publicly until we have had a chance to address them.**
 
