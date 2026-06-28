@@ -13,8 +13,10 @@ set -euo pipefail
 PR_NUMBER="${1:?PR number is required}"
 GITHUB_REPOSITORY="${2:?GitHub repository is required}"
 
-# Dynamically determine the bot's username from the token
-BOT_USERNAME=$(gh api user --jq '.login')
+# Dynamically determine the bot's username from the token.
+# gh api user fails with 403 when using GITHUB_TOKEN (installation token),
+# so fall back to GITHUB_ACTOR in that case.
+BOT_USERNAME=$(gh api user --jq '.login' 2>/dev/null || echo "${GITHUB_ACTOR:-github-actions[bot]}")
 echo "Detected bot username: $BOT_USERNAME"
 
 # Get current HEAD commit SHA of the PR
