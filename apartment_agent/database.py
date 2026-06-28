@@ -3,13 +3,13 @@ from __future__ import annotations
 import sqlite3
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
-from wohnung_agent.models import Apartment, ApartmentMatch
+from apartment_agent.models import Apartment, ApartmentMatch
 
 
 class ApartmentDatabase:
     """Persist apartment matches in SQLite."""
 
-    def __init__(self, database_path: str | Path = "wohnungen.sqlite3") -> None:
+    def __init__(self, database_path: str | Path = "apartments.sqlite3") -> None:
         """Open a database connection and initialize the schema."""
         self.database_path = Path(database_path).resolve()
         self.connection = sqlite3.connect(self.database_path)

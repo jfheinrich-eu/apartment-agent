@@ -1,22 +1,22 @@
 # CODEOWNERS - Define code ownership and require reviews
 
 # Default owners for everything
-* @jfheinrich
+* @jfheinrich-eu/maintainers @jfheinrich-bot
 
 # Adapter implementations
-/wohnung_agent/adapters/ @jfheinrich
+/apartment_agent/adapters/ @jfheinrich-eu/maintainers @jfheinrich-bot
 
 # Configuration and loading
-/wohnung_agent/config_loader.py @jfheinrich
-/config/ @jfheinrich
+/apartment_agent/config_loader.py @jfheinrich-eu/maintainers @jfheinrich-bot
+/config/ @jfheinrich-eu/maintainers @jfheinrich-bot
 
 # Database and persistence
-/wohnung_agent/database.py @jfheinrich
+/apartment_agent/database.py @jfheinrich-eu/maintainers @jfheinrich-bot
 
 # Tests
-/tests/ @jfheinrich
+/tests/ @jfheinrich-eu/maintainers @jfheinrich-bot
 
 # CI/CD and Governance
-/.github/ @jfheinrich
-/pyproject.toml @jfheinrich
-/Makefile @jfheinrich
+/.github/ @jfheinrich-eu/maintainers @jfheinrich-bot
+/pyproject.toml @jfheinrich-eu/maintainers @jfheinrich-bot
+/Makefile @jfheinrich-eu/maintainers @jfheinrich-bot

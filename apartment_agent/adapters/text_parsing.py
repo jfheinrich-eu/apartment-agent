@@ -4,7 +4,7 @@ import hashlib
 import re
 from urllib.parse import urlparse, parse_qs
 
-from wohnung_agent.i18n import tr
+from apartment_agent.i18n import tr
 
 
 def stable_id_from_url(url: str) -> str:

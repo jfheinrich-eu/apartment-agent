@@ -2,8 +2,8 @@ from __future__ import annotations
 
 from typing import cast
 
-from wohnung_agent.adapters.base import ApartmentAdapter
-from wohnung_agent.models import Apartment, HttpUrl, SearchProfile
+from apartment_agent.adapters.base import ApartmentAdapter
+from apartment_agent.models import Apartment, HttpUrl, SearchProfile
 
 
 class DemoAdapter(ApartmentAdapter):

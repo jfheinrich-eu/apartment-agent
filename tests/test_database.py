@@ -2,8 +2,8 @@ from __future__ import annotations
 
 from datetime import datetime, timedelta, timezone
 
-from wohnung_agent.database import ApartmentDatabase
-from wohnung_agent.models import Apartment, ApartmentMatch
+from apartment_agent.database import ApartmentDatabase
+from apartment_agent.models import Apartment, ApartmentMatch
 
 
 def make_apartment(external_id: str, days_ago: int = 0, city: str = "Boizenburg") -> Apartment:

@@ -5,8 +5,8 @@ import smtplib
 import ssl
 from email.message import EmailMessage
 import requests
-from wohnung_agent.i18n import tr
-from wohnung_agent.models import ApartmentMatch, AppConfig
+from apartment_agent.i18n import tr
+from apartment_agent.models import ApartmentMatch, AppConfig
 
 LOGGER = logging.getLogger(__name__)
 

@@ -139,7 +139,7 @@ class AppConfig(BaseModel):
 
     # Optional settings
     language: str = "en"
-    database_path: str = "wohnungen.sqlite3"
+    database_path: str = "apartments.sqlite3"
 
     # Adapter configurations
     demo: DemoAdapterConfig = Field(default_factory=DemoAdapterConfig)

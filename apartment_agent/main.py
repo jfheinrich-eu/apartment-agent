@@ -6,15 +6,15 @@ from pathlib import Path
 from typing import Any, cast
 
 from apscheduler.schedulers.blocking import BlockingScheduler
-from wohnung_agent.adapters.base import ApartmentAdapter
-from wohnung_agent.adapters.demo_adapter import DemoAdapter
-from wohnung_agent.config_loader import load_config, load_database_path, load_language, load_search_profile
-from wohnung_agent.database import ApartmentDatabase
-from wohnung_agent.filter_engine import FilterEngine
-from wohnung_agent.i18n import tr
-from wohnung_agent.notifier import Notifier
-from wohnung_agent.reporting import generate_open_apartments_markdown
-from wohnung_agent.runner import ApartmentSearchRunner
+from apartment_agent.adapters.base import ApartmentAdapter
+from apartment_agent.adapters.demo_adapter import DemoAdapter
+from apartment_agent.config_loader import load_config, load_database_path, load_language, load_search_profile
+from apartment_agent.database import ApartmentDatabase
+from apartment_agent.filter_engine import FilterEngine
+from apartment_agent.i18n import tr
+from apartment_agent.notifier import Notifier
+from apartment_agent.reporting import generate_open_apartments_markdown
+from apartment_agent.runner import ApartmentSearchRunner
 
 LOGGER = logging.getLogger(__name__)
 
@@ -31,7 +31,7 @@ def build_runner(config_path: str) -> ApartmentSearchRunner:
 
     if config.immowelt.enabled:
         try:
-            from wohnung_agent.adapters.immowelt_adapter import ImmoweltAdapter
+            from apartment_agent.adapters.immowelt_adapter import ImmoweltAdapter
             adapter_search_urls: list[str | dict[str, str]] = []
             for item in config.immowelt.search_urls:
                 if isinstance(item, str):

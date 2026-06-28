@@ -3,7 +3,7 @@ from __future__ import annotations
 from datetime import datetime, timezone
 from typing import Any
 
-from wohnung_agent.i18n import tr
+from apartment_agent.i18n import tr
 
 
 def _stringify(value: Any, default: str) -> str:

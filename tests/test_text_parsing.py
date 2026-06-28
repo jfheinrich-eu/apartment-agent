@@ -1,4 +1,4 @@
-from wohnung_agent.adapters.text_parsing import (
+from apartment_agent.adapters.text_parsing import (
     detect_city,
     stable_id_from_url,
     parse_has_kitchen,

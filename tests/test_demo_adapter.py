@@ -1,5 +1,5 @@
-from wohnung_agent.adapters.demo_adapter import DemoAdapter
-from wohnung_agent.models import Apartment, SearchProfile
+from apartment_agent.adapters.demo_adapter import DemoAdapter
+from apartment_agent.models import Apartment, SearchProfile
 
 
 def test_demo_adapter_search_returns_apartments():

@@ -2,8 +2,8 @@ from pathlib import Path
 
 import pytest
 
-from wohnung_agent.config_loader import load_config, load_database_path, load_language, load_search_profile
-from wohnung_agent.models import AppConfig
+from apartment_agent.config_loader import load_config, load_database_path, load_language, load_search_profile
+from apartment_agent.models import AppConfig
 from unittest.mock import patch
 
 
@@ -134,7 +134,7 @@ def test_load_language_uses_locale_fallback_when_not_explicitly_set():
         min_rooms=2.5,
         regions=["Boizenburg"],
     )
-    with patch("wohnung_agent.config_loader.resolve_language", return_value="de"):
+    with patch("apartment_agent.config_loader.resolve_language", return_value="de"):
         assert load_language(config) == "de"
 
 
@@ -178,7 +178,7 @@ def test_load_database_path_default():
         min_rooms=2.5,
         regions=["Boizenburg"],
     )
-    assert load_database_path(config) == "wohnungen.sqlite3"
+    assert load_database_path(config) == "apartments.sqlite3"
 
 
 def test_load_config_raises_for_missing_file(tmp_path):
@@ -209,7 +209,7 @@ def test_load_config_with_defaults(tmp_path):
     
     # Check defaults
     assert config.language == "en"
-    assert config.database_path == "wohnungen.sqlite3"
+    assert config.database_path == "apartments.sqlite3"
     assert config.kitchen_required is True
     assert config.demo.enabled is False
     assert config.immowelt.enabled is False

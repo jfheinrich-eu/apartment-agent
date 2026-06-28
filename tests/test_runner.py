@@ -7,12 +7,12 @@ using the contract: adapter.search(profile) -> list[Apartment]
 
 from unittest.mock import MagicMock
 
-from wohnung_agent.adapters.demo_adapter import DemoAdapter
-from wohnung_agent.database import ApartmentDatabase
-from wohnung_agent.filter_engine import FilterEngine
-from wohnung_agent.models import Apartment, SearchProfile
-from wohnung_agent.notifier import Notifier
-from wohnung_agent.runner import ApartmentSearchRunner
+from apartment_agent.adapters.demo_adapter import DemoAdapter
+from apartment_agent.database import ApartmentDatabase
+from apartment_agent.filter_engine import FilterEngine
+from apartment_agent.models import Apartment, SearchProfile
+from apartment_agent.notifier import Notifier
+from apartment_agent.runner import ApartmentSearchRunner
 
 
 def test_runner_processes_demo_adapter_without_exception(tmp_path):

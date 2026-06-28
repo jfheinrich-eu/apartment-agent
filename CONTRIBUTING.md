@@ -1,6 +1,6 @@
-# Contributing to Wohnung Agent
+# Contributing to Apartment Agent
 
-Thank you for your interest in contributing to Wohnung Agent! This document provides guidelines and instructions for contributing.
+Thank you for your interest in contributing to Apartment Agent! This document provides guidelines and instructions for contributing.
 
 ## Code of Conduct
 
@@ -67,11 +67,11 @@ Feature suggestions are welcome! Use GitHub Issues with:
 ### Architecture
 
 The project uses an adapter-based architecture:
-- **Adapters** (`wohnung_agent/adapters/`): Data source implementations
-- **Models** (`wohnung_agent/models.py`): Pydantic data structures
-- **Filter Engine** (`wohnung_agent/filter_engine.py`): Scoring and filtering logic
-- **Database** (`wohnung_agent/database.py`): SQLite persistence
-- **Config** (`wohnung_agent/config_loader.py`): Configuration loading and validation
+- **Adapters** (`apartment_agent/adapters/`): Data source implementations
+- **Models** (`apartment_agent/models.py`): Pydantic data structures
+- **Filter Engine** (`apartment_agent/filter_engine.py`): Scoring and filtering logic
+- **Database** (`apartment_agent/database.py`): SQLite persistence
+- **Config** (`apartment_agent/config_loader.py`): Configuration loading and validation
 
 ### Code Style
 

@@ -1,4 +1,4 @@
-from wohnung_agent.i18n import tr
+from apartment_agent.i18n import tr
 
 
 def test_tr_falls_back_to_default_language_and_key():

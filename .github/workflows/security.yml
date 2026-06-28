@@ -50,12 +50,12 @@ jobs:
         run: pip install bandit
       
       - name: Run Bandit
-        run: bandit -r wohnung_agent -f json -o bandit.json 2>&1 || true
+        run: bandit -r apartment_agent -f json -o bandit.json 2>&1 || true
         continue-on-error: true
       
       - name: Display Bandit results
         if: always()
         run: |
           pip install bandit
-          bandit -r wohnung_agent -f txt
+          bandit -r apartment_agent -f txt
 

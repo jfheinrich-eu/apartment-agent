@@ -1,0 +1,115 @@
+name: Auto Request and Automated Review
+
+on:
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: "PR number to review (optional, will auto-detect if not provided)"
+        required: false
+        type: string
+  pull_request:
+    types: [opened, reopened, ready_for_review, synchronize]
+  check_suite:
+    types: [completed]
+  workflow_run:
+    workflows: ["CI", "Security", "CodeQL"]
+    types: [completed]
+
+permissions:
+  contents: read
+  pull-requests: write
+  checks: read
+  statuses: read
+
+jobs:
+  request-review:
+    if: github.event_name == 'pull_request' && github.event.pull_request.draft == false
+    runs-on: ubuntu-latest
+    steps:
+      - name: Request review from jfheinrich-bot
+        uses: actions/github-script@v7
+        with:
+          script: |
+            try {
+              await github.rest.pulls.requestReviewers({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: context.payload.pull_request.number,
+                reviewers: ["jfheinrich-bot"],
+              });
+            } catch (error) {
+              if (error.status === 422) {
+                core.info("Reviewer already requested or cannot be requested in current state.");
+              } else {
+                throw error;
+              }
+            }
+
+  auto-review:
+    name: Auto Review by Bot
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    if: |
+      github.event_name == 'workflow_dispatch' ||
+      github.event_name == 'pull_request' ||
+      (github.event_name == 'check_suite' && github.event.check_suite.conclusion == 'success') ||
+      (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success')
+    env:
+      GH_TOKEN: ${{ secrets.BOT_TOKEN || secrets.JFHEINRICH_BOT_TOKEN }}
+      BOT_REVIEWER_LOGIN: jfheinrich-bot
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Validate BOT token availability
+        run: |
+          if [[ -z "${GH_TOKEN:-}" ]]; then
+            echo "Neither BOT_TOKEN nor JFHEINRICH_BOT_TOKEN is configured; cannot submit review as jfheinrich-bot."
+            exit 1
+          fi
+
+      - name: Checkout repository
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Validate and get PR number
+        id: get-pr
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          PR_NUMBER_DIRECT: ${{ github.event.pull_request.number }}
+          PR_NUMBER_INPUT: ${{ github.event.inputs.pr_number }}
+          PR_DRAFT: ${{ github.event.pull_request.draft }}
+          GITHUB_HEAD_REF: ${{ github.head_ref }}
+          GITHUB_REF_NAME: ${{ github.ref_name }}
+          CHECK_SUITE_PRS: ${{ toJson(github.event.check_suite.pull_requests) }}
+          WORKFLOW_RUN_PRS: ${{ toJson(github.event.workflow_run.pull_requests) }}
+        run: .github/scripts/get-pr-number.sh
+
+      - name: Check all required checks status
+        id: check-status
+        if: steps.get-pr.outputs.pr_number
+        run: .github/scripts/check-pr-status.sh "${{ steps.get-pr.outputs.pr_number }}" "${{ github.repository }}"
+
+      - name: Check if bot already reviewed current commit
+        id: check-reviewed
+        if: steps.check-status.outputs.can_review == 'true'
+        run: .github/scripts/check-already-reviewed.sh "${{ steps.get-pr.outputs.pr_number }}" "${{ github.repository }}"
+
+      - name: Perform automated review
+        if: |
+          steps.check-status.outputs.can_review == 'true' &&
+          steps.check-reviewed.outputs.already_reviewed == 'false'
+        run: .github/scripts/submit-review.sh "${{ steps.get-pr.outputs.pr_number }}"
+
+      - name: Add review label
+        if: |
+          steps.check-status.outputs.can_review == 'true' &&
+          steps.check-reviewed.outputs.already_reviewed == 'false'
+        env:
+          GITHUB_REPOSITORY: ${{ github.repository }}
+        run: .github/scripts/add-review-label.sh "${{ steps.get-pr.outputs.pr_number }}"
+
+      - name: Handle errors gracefully
+        if: failure()
+        run: .github/scripts/handle-error.sh "${{ steps.get-pr.outputs.pr_number }}"

@@ -32,7 +32,7 @@ jobs:
 
       - name: Generate coverage XML
         if: matrix.python-version == '3.11'
-        run: pytest --cov=wohnung_agent --cov-report=xml tests/
+        run: pytest --cov=apartment_agent --cov-report=xml tests/
       
       - name: Upload coverage reports
         if: matrix.python-version == '3.11'
@@ -63,9 +63,9 @@ jobs:
       - name: Lint with flake8
         run: |
           # Stop the build if there are Python syntax errors or undefined names
-          flake8 wohnung_agent tests --count --select=E9,F63,F7,F82 --show-source --statistics
+          flake8 apartment_agent tests --count --select=E9,F63,F7,F82 --show-source --statistics
           # Exit-zero treats all errors as warnings
-          flake8 wohnung_agent tests --count --exit-zero --max-complexity=10 --max-line-length=100 --statistics
+          flake8 apartment_agent tests --count --exit-zero --max-complexity=10 --max-line-length=100 --statistics
         if: always()
 
   type-check:
@@ -86,4 +86,4 @@ jobs:
           pip install -e ".[dev]"
       
       - name: Type check with mypy
-        run: mypy wohnung_agent --ignore-missing-imports --no-implicit-optional
+        run: mypy apartment_agent --ignore-missing-imports --no-implicit-optional

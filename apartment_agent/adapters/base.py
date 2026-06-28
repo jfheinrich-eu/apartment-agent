@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from wohnung_agent.models import Apartment, SearchProfile
+from apartment_agent.models import Apartment, SearchProfile
 
 
 class ApartmentAdapter(ABC):

@@ -37,17 +37,17 @@ test: dev-install
 	$(VENV_PYTHON) -m pytest tests/ -v
 
 run: install
-	$(VENV_BIN)/wohnung-agent --config $(CONFIG)
+	$(VENV_BIN)/apartment-agent --config $(CONFIG)
 
 run-once: install
-	$(VENV_BIN)/wohnung-agent --config $(CONFIG) --once
+	$(VENV_BIN)/apartment-agent --config $(CONFIG) --once
 
 lint: install
-	$(VENV_PYTHON) -m compileall -q wohnung_agent tests
+	$(VENV_PYTHON) -m compileall -q apartment_agent tests
 
 format: install
 	@if $(VENV_PYTHON) -m black --version >/dev/null 2>&1; then \
-		$(VENV_PYTHON) -m black wohnung_agent tests; \
+		$(VENV_PYTHON) -m black apartment_agent tests; \
 	else \
 		echo "black is not installed. Install with: $(VENV_PIP) install black"; \
 	fi
