@@ -1,15 +1,29 @@
-name: Auto Request Reviews
+name: Auto Request and Automated Review
 
 on:
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: "PR number to review (optional, will auto-detect if not provided)"
+        required: false
+        type: string
   pull_request:
     types: [opened, reopened, ready_for_review, synchronize]
+  check_suite:
+    types: [completed]
+  workflow_run:
+    workflows: ["CI", "Security"]
+    types: [completed]
 
 permissions:
+  contents: read
   pull-requests: write
+  checks: read
+  statuses: read
 
 jobs:
   request-review:
-    if: github.event.pull_request.draft == false
+    if: github.event_name == 'pull_request' && github.event.pull_request.draft == false
     runs-on: ubuntu-latest
     steps:
       - name: Request review from jfheinrich-bot
@@ -30,3 +44,62 @@ jobs:
                 throw error;
               }
             }
+
+  auto-review:
+    name: Auto Review by Bot
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      GH_TOKEN: ${{ secrets.BOT_TOKEN || secrets.GITHUB_TOKEN }}
+    defaults:
+      run:
+        shell: bash
+    if: |
+      github.event_name == 'workflow_dispatch' ||
+      github.event_name == 'pull_request' ||
+      (github.event_name == 'check_suite' && github.event.check_suite.conclusion == 'success') ||
+      (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success')
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Validate and get PR number
+        id: get-pr
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          PR_NUMBER_DIRECT: ${{ github.event.pull_request.number }}
+          PR_NUMBER_INPUT: ${{ github.event.inputs.pr_number }}
+          PR_DRAFT: ${{ github.event.pull_request.draft }}
+          GITHUB_HEAD_REF: ${{ github.head_ref }}
+          GITHUB_REF_NAME: ${{ github.ref_name }}
+          CHECK_SUITE_PRS: ${{ toJson(github.event.check_suite.pull_requests) }}
+          WORKFLOW_RUN_PRS: ${{ toJson(github.event.workflow_run.pull_requests) }}
+        run: .github/scripts/get-pr-number.sh
+
+      - name: Check all required checks status
+        id: check-status
+        if: steps.get-pr.outputs.pr_number
+        run: .github/scripts/check-pr-status.sh "${{ steps.get-pr.outputs.pr_number }}" "${{ github.repository }}"
+
+      - name: Check if bot already reviewed current commit
+        id: check-reviewed
+        if: steps.check-status.outputs.can_review == 'true'
+        run: .github/scripts/check-already-reviewed.sh "${{ steps.get-pr.outputs.pr_number }}" "${{ github.repository }}"
+
+      - name: Perform automated review
+        if: |
+          steps.check-status.outputs.can_review == 'true' &&
+          steps.check-reviewed.outputs.already_reviewed == 'false'
+        run: .github/scripts/submit-review.sh "${{ steps.get-pr.outputs.pr_number }}"
+
+      - name: Add review label
+        if: |
+          steps.check-status.outputs.can_review == 'true' &&
+          steps.check-reviewed.outputs.already_reviewed == 'false'
+        run: .github/scripts/add-review-label.sh "${{ steps.get-pr.outputs.pr_number }}"
+
+      - name: Handle errors gracefully
+        if: failure()
+        run: .github/scripts/handle-error.sh "${{ steps.get-pr.outputs.pr_number }}"
