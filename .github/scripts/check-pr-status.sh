@@ -20,7 +20,11 @@ WAIT_MAX_SECONDS="${WAIT_MAX_SECONDS:-600}"
 WAIT_INTERVAL_SECONDS="${WAIT_INTERVAL_SECONDS:-20}"
 
 # Get PR details using GitHub CLI
-PR_DATA=$(gh pr view "$PR_NUMBER" --json state,isDraft,mergeable,statusCheckRollup)
+if ! PR_DATA=$(gh pr view "$PR_NUMBER" --json state,isDraft,mergeable,statusCheckRollup 2>/dev/null); then
+  echo "⚠️ Unable to fetch PR details with current credentials - skipping automated review"
+  echo "can_review=false" >> "$GITHUB_OUTPUT"
+  exit 0
+fi
 
 # Check if PR is still open and not draft
 STATE=$(echo "$PR_DATA" | jq -r '.state')
