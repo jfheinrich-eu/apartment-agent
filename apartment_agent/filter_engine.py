@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from wohnung_agent.models import Apartment, ApartmentMatch, SearchProfile, InternetStatus
-from wohnung_agent.i18n import tr
+from apartment_agent.models import Apartment, ApartmentMatch, SearchProfile, InternetStatus
+from apartment_agent.i18n import tr
 
 REGION_MATCH_SCORE = 25
 RENT_MATCH_SCORE = 30

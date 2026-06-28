@@ -2,11 +2,11 @@ from __future__ import annotations
 
 import logging
 
-from wohnung_agent.adapters.base import ApartmentAdapter
-from wohnung_agent.database import ApartmentDatabase
-from wohnung_agent.filter_engine import FilterEngine
-from wohnung_agent.i18n import tr
-from wohnung_agent.notifier import Notifier
+from apartment_agent.adapters.base import ApartmentAdapter
+from apartment_agent.database import ApartmentDatabase
+from apartment_agent.filter_engine import FilterEngine
+from apartment_agent.i18n import tr
+from apartment_agent.notifier import Notifier
 
 LOGGER = logging.getLogger(__name__)
 

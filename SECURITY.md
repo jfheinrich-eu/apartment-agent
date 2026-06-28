@@ -2,7 +2,7 @@
 
 ## Reporting Security Vulnerabilities
 
-If you discover a security vulnerability in Wohnung Agent, please use GitHub's private vulnerability reporting flow for this repository:
+If you discover a security vulnerability in Apartment Agent, please use GitHub's private vulnerability reporting flow for this repository:
 
 https://github.com/jfheinrich-eu/apartment-agent/security/advisories/new
 
@@ -19,7 +19,7 @@ We take all security reports seriously and will acknowledge receipt of your repo
 
 ## Security Best Practices
 
-When using Wohnung Agent:
+When using Apartment Agent:
 
 1. **Configuration Secrets**: Never commit sensitive data (API keys, passwords) to version control
    - Use environment variables or `.env` files (add to `.gitignore`)
@@ -30,8 +30,8 @@ When using Wohnung Agent:
    - Monitor Dependabot alerts on GitHub
 
 3. **Database**: Protect your SQLite database
-   - Store `wohnungen.sqlite3` securely
-   - Restrict file permissions: `chmod 600 wohnungen.sqlite3`
+   - Store `apartments.sqlite3` securely
+   - Restrict file permissions: `chmod 600 apartments.sqlite3`
    - Consider encrypting if storing sensitive personal data
 
 4. **Network Requests**: All HTTP requests use:
@@ -59,4 +59,4 @@ For non-security bugs or feature requests, please use [GitHub Issues](https://gi
 
 ---
 
-Thank you for helping keep Wohnung Agent secure!
+Thank you for helping keep Apartment Agent secure!

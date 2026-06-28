@@ -4,8 +4,8 @@ from unittest.mock import MagicMock, patch
 import pytest
 import requests
 
-from wohnung_agent.models import Apartment, ApartmentMatch, AppConfig, TelegramConfig, EmailConfig
-from wohnung_agent.notifier import Notifier
+from apartment_agent.models import Apartment, ApartmentMatch, AppConfig, TelegramConfig, EmailConfig
+from apartment_agent.notifier import Notifier
 
 
 def make_match() -> ApartmentMatch:
@@ -33,7 +33,7 @@ def test_send_handles_telegram_request_exception():
     notifier = Notifier(config, language="en")
 
     with patch(
-        "wohnung_agent.notifier.requests.post",
+        "apartment_agent.notifier.requests.post",
         side_effect=requests.RequestException("boom"),
     ):
         # No exception should bubble up from send()
@@ -57,7 +57,7 @@ def test_send_handles_specific_telegram_request_failures(side_effect, expected_f
     )
     notifier = Notifier(config, language="en")
 
-    with patch("wohnung_agent.notifier.requests.post", side_effect=side_effect):
+    with patch("apartment_agent.notifier.requests.post", side_effect=side_effect):
         notifier.send(make_match())
 
     assert expected_fragment in caplog.text
@@ -83,7 +83,7 @@ def test_send_handles_smtp_exception():
     smtp_mock = MagicMock()
     smtp_mock.__enter__.return_value.starttls.side_effect = OSError("smtp down")
 
-    with patch("wohnung_agent.notifier.smtplib.SMTP", return_value=smtp_mock):
+    with patch("apartment_agent.notifier.smtplib.SMTP", return_value=smtp_mock):
         # No exception should bubble up from send()
         notifier.send(make_match())
 
@@ -109,7 +109,7 @@ def test_send_logs_smtp_authentication_error_with_endpoint(caplog):
     smtp_session = smtp_mock.__enter__.return_value
     smtp_session.login.side_effect = smtplib.SMTPAuthenticationError(535, b"policy rejected")
 
-    with patch("wohnung_agent.notifier.smtplib.SMTP", return_value=smtp_mock):
+    with patch("apartment_agent.notifier.smtplib.SMTP", return_value=smtp_mock):
         notifier.send(make_match())
 
     assert "smtp-test-host:587" in caplog.text

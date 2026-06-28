@@ -1,0 +1,32 @@
+name: Auto Request Reviews
+
+on:
+  pull_request:
+    types: [opened, reopened, ready_for_review, synchronize]
+
+permissions:
+  pull-requests: write
+
+jobs:
+  request-review:
+    if: github.event.pull_request.draft == false
+    runs-on: ubuntu-latest
+    steps:
+      - name: Request review from jfheinrich-bot
+        uses: actions/github-script@v7
+        with:
+          script: |
+            try {
+              await github.rest.pulls.requestReviewers({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: context.payload.pull_request.number,
+                reviewers: ["jfheinrich-bot"],
+              });
+            } catch (error) {
+              if (error.status === 422) {
+                core.info("Reviewer already requested or cannot be requested in current state.");
+              } else {
+                throw error;
+              }
+            }

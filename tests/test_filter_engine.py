@@ -1,5 +1,5 @@
-from wohnung_agent.filter_engine import FilterEngine
-from wohnung_agent.models import Apartment, InternetStatus, SearchProfile
+from apartment_agent.filter_engine import FilterEngine
+from apartment_agent.models import Apartment, InternetStatus, SearchProfile
 
 
 def test_matching_apartment_is_not_rejected():
@@ -79,7 +79,7 @@ def test_result_has_reasons():
 
 def test_result_is_apartment_match():
     """Verify that evaluate() returns an ApartmentMatch object with correct fields."""
-    from wohnung_agent.models import ApartmentMatch
+    from apartment_agent.models import ApartmentMatch
 
     profile = SearchProfile(
         max_warm_rent=800,

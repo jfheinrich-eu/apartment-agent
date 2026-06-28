@@ -1,14 +1,14 @@
-# GitHub Copilot Instructions – wohnung_agent
+# GitHub Copilot Instructions – apartment_agent
 
 ## Project overview
 
 Python 3.11+ apartment search agent. Adapter-based architecture:
-- `wohnung_agent/adapters/` – data source adapters (all implement `search(profile) -> list[Apartment]`)
-- `wohnung_agent/models.py` – Pydantic data models
-- `wohnung_agent/filter_engine.py` – scoring and filtering
-- `wohnung_agent/database.py` – SQLite persistence
-- `wohnung_agent/runner.py` – search orchestration
-- `wohnung_agent/main.py` – CLI entry point
+- `apartment_agent/adapters/` – data source adapters (all implement `search(profile) -> list[Apartment]`)
+- `apartment_agent/models.py` – Pydantic data models
+- `apartment_agent/filter_engine.py` – scoring and filtering
+- `apartment_agent/database.py` – SQLite persistence
+- `apartment_agent/runner.py` – search orchestration
+- `apartment_agent/main.py` – CLI entry point
 - `tests/` – pytest test suite
 
 Dependencies: `requests`, `beautifulsoup4`, `pydantic`, `PyYAML`, `APScheduler`.  
@@ -79,7 +79,7 @@ Perform a full code-quality review of the entire project.
 
 Perform a complete code review of the entire project and provide actionable in-code annotations that can be worked through directly in VS Code.
 
-1. **Scope** – review all production code in `wohnung_agent/`, key configs in `config/`, and test coverage in `tests/`.
+1. **Scope** – review all production code in `apartment_agent/`, key configs in `config/`, and test coverage in `tests/`.
 2. **Review focus** – identify bugs, risks, regressions, maintainability issues, and missing tests first (severity order: Critical / High / Medium / Low).
 3. **Annotation format** – for each finding, propose an inline code annotation in this format so it can be inserted directly in files:
    - `# TODO(code-review): <short action>`

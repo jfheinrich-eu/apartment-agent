@@ -1,4 +1,4 @@
-from wohnung_agent.reporting import generate_open_apartments_markdown
+from apartment_agent.reporting import generate_open_apartments_markdown
 
 
 def test_generate_open_apartments_markdown_contains_table_and_values():

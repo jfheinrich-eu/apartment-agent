@@ -10,8 +10,8 @@ from urllib.parse import urljoin
 from bs4 import BeautifulSoup, Tag
 import requests
 
-from wohnung_agent.adapters.base import ApartmentAdapter
-from wohnung_agent.adapters.text_parsing import (
+from apartment_agent.adapters.base import ApartmentAdapter
+from apartment_agent.adapters.text_parsing import (
     detect_city,
     parse_has_kitchen,
     parse_living_area,
@@ -19,7 +19,7 @@ from wohnung_agent.adapters.text_parsing import (
     parse_warm_rent,
     stable_id_from_url,
 )
-from wohnung_agent.models import Apartment, HttpUrl, SearchProfile
+from apartment_agent.models import Apartment, HttpUrl, SearchProfile
 
 LOGGER = logging.getLogger(__name__)
 

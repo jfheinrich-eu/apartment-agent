@@ -1,4 +1,4 @@
-# Wohnung Agent v1
+# Apartment Agent v1
 
 [![CI](https://github.com/jfheinrich-eu/apartment-agent/actions/workflows/ci.yml/badge.svg)](https://github.com/jfheinrich-eu/apartment-agent/actions/workflows/ci.yml)
 [![Security](https://github.com/jfheinrich-eu/apartment-agent/actions/workflows/security.yml/badge.svg)](https://github.com/jfheinrich-eu/apartment-agent/actions/workflows/security.yml)
@@ -16,7 +16,7 @@ python -m venv .venv
 source .venv/bin/activate  # Windows: .venv\Scripts\activate
 pip install -e .
 cp config/search_profile.example.yml config/search_profile.yml
-wohnung-agent --config config/search_profile.yml --once
+apartment-agent --config config/search_profile.yml --once
 ```
 
 ### Full development setup
@@ -83,19 +83,19 @@ If not configured, the application uses the system locale and falls back to Engl
 ### One-time search
 
 ```bash
-wohnung-agent --config config/search_profile.yml --once
+apartment-agent --config config/search_profile.yml --once
 ```
 
 ### Scheduled search (every 60 minutes by default)
 
 ```bash
-wohnung-agent --config config/search_profile.yml
+apartment-agent --config config/search_profile.yml
 ```
 
 ### Custom interval
 
 ```bash
-wohnung-agent --config config/search_profile.yml --interval-minutes 30
+apartment-agent --config config/search_profile.yml --interval-minutes 30
 ```
 
 ### Report open apartments (markdown)
@@ -103,19 +103,19 @@ wohnung-agent --config config/search_profile.yml --interval-minutes 30
 Print all open apartments (non-rejected, seen within last 7 days):
 
 ```bash
-wohnung-agent --config config/search_profile.yml --report-open
+apartment-agent --config config/search_profile.yml --report-open
 ```
 
 Use a custom open-window in days:
 
 ```bash
-wohnung-agent --config config/search_profile.yml --report-open --open-days 14
+apartment-agent --config config/search_profile.yml --report-open --open-days 14
 ```
 
 Write report to markdown file (still prints to console):
 
 ```bash
-wohnung-agent --config config/search_profile.yml --report-open --report-output open_apartments.md
+apartment-agent --config config/search_profile.yml --report-open --report-output open_apartments.md
 ```
 
 ### Delete unavailable apartments
@@ -123,13 +123,13 @@ wohnung-agent --config config/search_profile.yml --report-open --report-output o
 Delete one apartment by unique key:
 
 ```bash
-wohnung-agent --config config/search_profile.yml --delete-key immowelt:123456
+apartment-agent --config config/search_profile.yml --delete-key immowelt:123456
 ```
 
 Delete all apartments that were last seen more than N days ago:
 
 ```bash
-wohnung-agent --config config/search_profile.yml --delete-older-than-days 30
+apartment-agent --config config/search_profile.yml --delete-older-than-days 30
 ```
 
 ## Using make
@@ -148,7 +148,7 @@ See `make help` for all available targets.
 
 ## Project structure
 
-- `wohnung_agent/` - Main package
+- `apartment_agent/` - Main package
   - `adapters/` - Data source adapters
     - `base.py` - Base adapter interface
     - `demo_adapter.py` - Test data
@@ -189,15 +189,15 @@ pip install -e ".[dev]"
 make test
 
 # Run with coverage
-pytest --cov=wohnung_agent tests/
+pytest --cov=apartment_agent tests/
 
 # Lint with flake8
-flake8 wohnung_agent tests --max-line-length=100
+flake8 apartment_agent tests --max-line-length=100
 ```
 
 ### Adding a New Adapter
 
-1. Create a new file in `wohnung_agent/adapters/` (e.g., `my_portal_adapter.py`)
+1. Create a new file in `apartment_agent/adapters/` (e.g., `my_portal_adapter.py`)
 2. Extend `ApartmentAdapter` from `base.py`
 3. Implement the `search()` method
 4. Add tests in `tests/test_my_portal_adapter.py`

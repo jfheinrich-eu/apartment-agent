@@ -33,7 +33,7 @@ immowelt:
       city_hint: "Boizenburg"
     - url: "https://www.immowelt.de/suche/lueneburg/wohnungen/mieten"
       city_hint: "Lüneburg"
-database_path: wohnungen.sqlite3
+database_path: apartments.sqlite3
 
 telegram:
   enabled: false

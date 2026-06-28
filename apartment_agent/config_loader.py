@@ -3,8 +3,8 @@ from __future__ import annotations
 from pathlib import Path
 import yaml
 
-from wohnung_agent.i18n import resolve_language
-from wohnung_agent.models import AppConfig, SearchProfile
+from apartment_agent.i18n import resolve_language
+from apartment_agent.models import AppConfig, SearchProfile
 
 
 def load_config(config_path: str | Path) -> AppConfig:

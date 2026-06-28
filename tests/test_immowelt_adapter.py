@@ -10,14 +10,14 @@ import pytest
 import requests
 from unittest.mock import MagicMock, patch
 
-from wohnung_agent.models import SearchProfile
+from apartment_agent.models import SearchProfile
 
 
 def test_immowelt_adapter_respects_config_parameters():
     """
     Verify that ImmoweltAdapter correctly initializes with config parameters.
     """
-    from wohnung_agent.adapters.immowelt_adapter import ImmoweltAdapter
+    from apartment_agent.adapters.immowelt_adapter import ImmoweltAdapter
 
     search_urls = [
         {
@@ -48,7 +48,7 @@ def test_immowelt_adapter_respects_config_parameters():
     ],
 )
 def test_immowelt_adapter_rejects_invalid_timing_configuration(kwargs, expected_message):
-    from wohnung_agent.adapters.immowelt_adapter import ImmoweltAdapter
+    from apartment_agent.adapters.immowelt_adapter import ImmoweltAdapter
 
     with pytest.raises(ValueError, match=expected_message):
         ImmoweltAdapter(search_urls=[], **kwargs)
@@ -58,7 +58,7 @@ def test_immowelt_adapter_with_empty_urls():
     """
     Verify that ImmoweltAdapter gracefully handles empty search_urls list.
     """
-    from wohnung_agent.adapters.immowelt_adapter import ImmoweltAdapter
+    from apartment_agent.adapters.immowelt_adapter import ImmoweltAdapter
 
     adapter = ImmoweltAdapter(search_urls=[])
     profile = SearchProfile(
@@ -77,7 +77,7 @@ def test_immowelt_adapter_normalizes_search_urls():
     """
     Verify that ImmoweltAdapter normalizes search URLs from different formats.
     """
-    from wohnung_agent.adapters.immowelt_adapter import ImmoweltAdapter
+    from apartment_agent.adapters.immowelt_adapter import ImmoweltAdapter
 
     search_urls = [
         "https://example.immowelt.de/search1",  # string format
@@ -99,14 +99,14 @@ def test_immowelt_adapter_has_source_name():
     """
     Verify that ImmoweltAdapter has correct source name.
     """
-    from wohnung_agent.adapters.immowelt_adapter import ImmoweltAdapter
+    from apartment_agent.adapters.immowelt_adapter import ImmoweltAdapter
 
     adapter = ImmoweltAdapter(search_urls=[])
     assert adapter.source_name == "immowelt"
 
 
 def test_find_expose_links_and_deduplicate():
-    from wohnung_agent.adapters.immowelt_adapter import ImmoweltAdapter
+    from apartment_agent.adapters.immowelt_adapter import ImmoweltAdapter
 
     adapter = ImmoweltAdapter(search_urls=[])
     soup = BeautifulSoup(
@@ -120,7 +120,7 @@ def test_find_expose_links_and_deduplicate():
 
 
 def test_extract_title_and_card_container_helpers():
-    from wohnung_agent.adapters.immowelt_adapter import ImmoweltAdapter
+    from apartment_agent.adapters.immowelt_adapter import ImmoweltAdapter
 
     adapter = ImmoweltAdapter(search_urls=[])
     soup = BeautifulSoup(
@@ -139,7 +139,7 @@ def test_extract_title_and_card_container_helpers():
 
 
 def test_parse_html_extracts_apartment():
-    from wohnung_agent.adapters.immowelt_adapter import ImmoweltAdapter, ImmoweltSearchUrl
+    from apartment_agent.adapters.immowelt_adapter import ImmoweltAdapter, ImmoweltSearchUrl
 
     adapter = ImmoweltAdapter(search_urls=[], language="en")
     profile = SearchProfile(
@@ -167,7 +167,7 @@ def test_parse_html_extracts_apartment():
 
 
 def test_search_handles_request_exception_without_crash():
-    from wohnung_agent.adapters.immowelt_adapter import ImmoweltAdapter
+    from apartment_agent.adapters.immowelt_adapter import ImmoweltAdapter
 
     adapter = ImmoweltAdapter(search_urls=["https://example.immowelt.de/search"])
     profile = SearchProfile(
@@ -180,13 +180,13 @@ def test_search_handles_request_exception_without_crash():
     session_instance = MagicMock()
     session_instance.get.side_effect = requests.RequestException("boom")
 
-    with patch("wohnung_agent.adapters.immowelt_adapter.requests.Session", return_value=session_instance):
+    with patch("apartment_agent.adapters.immowelt_adapter.requests.Session", return_value=session_instance):
         result = adapter.search(profile)
     assert result == []
 
 
 def test_extract_title_uses_card_fallback_when_link_text_short():
-    from wohnung_agent.adapters.immowelt_adapter import ImmoweltAdapter
+    from apartment_agent.adapters.immowelt_adapter import ImmoweltAdapter
 
     adapter = ImmoweltAdapter(search_urls=[])
     soup = BeautifulSoup('<a href="/expose/1">Mehr</a>', "html.parser")
