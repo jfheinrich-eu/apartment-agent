@@ -3,7 +3,10 @@ from __future__ import annotations
 import argparse
 import logging
 from pathlib import Path
+from typing import Any, cast
+
 from apscheduler.schedulers.blocking import BlockingScheduler
+from wohnung_agent.adapters.base import ApartmentAdapter
 from wohnung_agent.adapters.demo_adapter import DemoAdapter
 from wohnung_agent.config_loader import load_config, load_database_path, load_language, load_search_profile
 from wohnung_agent.database import ApartmentDatabase
@@ -22,24 +25,22 @@ def build_runner(config_path: str) -> ApartmentSearchRunner:
     language = load_language(config)
     profile = load_search_profile(config)
 
-    adapters = []
-
+    adapters: list[ApartmentAdapter] = []
     if config.demo.enabled:
         adapters.append(DemoAdapter())
 
     if config.immowelt.enabled:
         try:
             from wohnung_agent.adapters.immowelt_adapter import ImmoweltAdapter
-            # Convert ImmoweltSearchUrlConfig objects to dicts for adapter compatibility
-            search_urls = [
-                {"url": item.url, "city_hint": item.city_hint}
-                if hasattr(item, "url")
-                else item
-                for item in config.immowelt.search_urls
-            ]
+            adapter_search_urls: list[str | dict[str, str]] = []
+            for item in config.immowelt.search_urls:
+                if isinstance(item, str):
+                    adapter_search_urls.append(item)
+                else:
+                    adapter_search_urls.append({"url": item.url, "city_hint": item.city_hint or ""})
             adapters.append(
                 ImmoweltAdapter(
-                    search_urls=search_urls,
+                    search_urls=adapter_search_urls,
                     timeout_ms=config.immowelt.timeout_ms,
                     throttle_seconds=config.immowelt.throttle_seconds,
                     language=language,
