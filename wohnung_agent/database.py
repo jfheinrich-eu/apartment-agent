@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import sqlite3
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from wohnung_agent.models import Apartment, ApartmentMatch
 
@@ -87,6 +88,44 @@ class ApartmentDatabase:
         )
         self.connection.commit()
         return is_new
+
+    def get_open_apartments(self, open_days: int = 7) -> list[dict[str, object]]:
+        """Return non-rejected apartments seen within the last open_days days."""
+        if open_days < 0:
+            raise ValueError("open_days must be >= 0")
+
+        cutoff = datetime.now(timezone.utc) - timedelta(days=open_days)
+        cursor = self.connection.execute(
+            """
+            SELECT * FROM apartments
+            WHERE rejected = 0 AND last_seen_at >= ?
+            ORDER BY COALESCE(score, -1) DESC, last_seen_at DESC
+            """,
+            (cutoff.isoformat(),),
+        )
+        return [dict(row) for row in cursor.fetchall()]
+
+    def delete_apartment(self, unique_key: str) -> bool:
+        """Delete one apartment by unique key and return True when it existed."""
+        cursor = self.connection.execute(
+            "DELETE FROM apartments WHERE unique_key = ?",
+            (unique_key,),
+        )
+        self.connection.commit()
+        return cursor.rowcount > 0
+
+    def delete_apartments_older_than_days(self, days: int) -> int:
+        """Delete apartments with last_seen_at older than the given number of days."""
+        if days < 0:
+            raise ValueError("days must be >= 0")
+
+        cutoff = datetime.now(timezone.utc) - timedelta(days=days)
+        cursor = self.connection.execute(
+            "DELETE FROM apartments WHERE last_seen_at < ?",
+            (cutoff.isoformat(),),
+        )
+        self.connection.commit()
+        return cursor.rowcount
 
     def close(self) -> None:
         """Close the SQLite connection."""
