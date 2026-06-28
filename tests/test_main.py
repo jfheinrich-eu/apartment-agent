@@ -3,21 +3,22 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from wohnung_agent.main import build_runner, main
+from wohnung_agent.models import AppConfig, DemoAdapterConfig, ImmoweltAdapterConfig, TelegramConfig, EmailConfig
 
 
-def base_config() -> dict:
-    return {
-        "max_warm_rent": 800,
-        "min_rooms": 2.5,
-        "kitchen_required": True,
-        "regions": ["Boizenburg"],
-        "language": "en",
-        "database_path": "wohnungen.sqlite3",
-        "demo": {"enabled": True},
-        "immowelt": {"enabled": False},
-        "telegram": {"enabled": False},
-        "email": {"enabled": False},
-    }
+def base_config() -> AppConfig:
+    return AppConfig(
+        max_warm_rent=800,
+        min_rooms=2.5,
+        kitchen_required=True,
+        regions=["Boizenburg"],
+        language="en",
+        database_path="wohnungen.sqlite3",
+        demo=DemoAdapterConfig(enabled=True),
+        immowelt=ImmoweltAdapterConfig(enabled=False),
+        telegram=TelegramConfig(enabled=False),
+        email=EmailConfig(enabled=False),
+    )
 
 
 def test_build_runner_returns_runner_with_demo_adapter():
@@ -28,8 +29,8 @@ def test_build_runner_returns_runner_with_demo_adapter():
 
 def test_build_runner_raises_when_no_adapters_enabled():
     config = base_config()
-    config["demo"]["enabled"] = False
-    config["immowelt"]["enabled"] = False
+    config.demo.enabled = False
+    config.immowelt.enabled = False
     with patch("wohnung_agent.main.load_config", return_value=config):
         with pytest.raises(ValueError):
             build_runner("config/search_profile.yml")
