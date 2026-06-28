@@ -48,6 +48,11 @@ class ImmoweltAdapter(ApartmentAdapter):
         language: str = "en",
     ) -> None:
         """Configure URL inputs, network timing, and output language."""
+        if timeout_ms <= 0:
+            raise ValueError("timeout_ms must be positive")
+        if throttle_seconds < 0:
+            raise ValueError("throttle_seconds must be non-negative")
+        
         self.search_urls = [self._normalize_search_url(item) for item in search_urls]
         self.timeout_ms = timeout_ms
         self.throttle_seconds = throttle_seconds
@@ -87,10 +92,13 @@ class ImmoweltAdapter(ApartmentAdapter):
                     time.sleep(self.throttle_seconds)
                 except requests.Timeout as error:
                     LOGGER.warning("Immowelt timeout for %s: %s", search_url.url, error)
+                except requests.ConnectionError as error:
+                    LOGGER.warning("Immowelt connection error for %s: %s", search_url.url, error)
                 except requests.RequestException as error:
                     LOGGER.warning("Immowelt request failed for %s: %s", search_url.url, error)
-                except Exception:
-                    LOGGER.exception("Immowelt adapter failed for %s", search_url.url)
+                except Exception as error:
+                    # Catch unexpected errors but log with full traceback for debugging
+                    LOGGER.exception("Immowelt adapter unexpected failure for %s: %s", search_url.url, error)
         finally:
             session.close()
 

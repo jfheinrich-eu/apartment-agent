@@ -55,16 +55,21 @@ class Notifier:
             LOGGER.error("Telegram notification enabled but bot_token or chat_id is missing.")
             return
 
-        LOGGER.info("Sending Telegram notification")
+        LOGGER.info("Sending Telegram notification to chat %s", chat_id)
         try:
             response = requests.post(
                 f"https://api.telegram.org/bot{bot_token}/sendMessage",
                 json={"chat_id": chat_id, "text": message},
-                timeout=20,
+                timeout=10,
             )
             response.raise_for_status()
-        except requests.RequestException:
-            LOGGER.exception("Telegram notification failed")
+            LOGGER.info("Telegram notification sent successfully")
+        except requests.Timeout as error:
+            LOGGER.warning("Telegram request timeout for chat %s: %s", chat_id, error)
+        except requests.ConnectionError as error:
+            LOGGER.warning("Telegram connection error for chat %s: %s", chat_id, error)
+        except requests.RequestException as error:
+            LOGGER.exception("Telegram notification failed for chat %s: %s", chat_id, error)
 
     def _send_email(self, message: str) -> None:
         email_config = self.config.get("email", {})
@@ -88,11 +93,16 @@ class Notifier:
         email_message.set_content(message)
 
         tls_context = ssl.create_default_context()
-        LOGGER.info("Sending email notification to %s via %s", recipient, smtp_host)
+        LOGGER.info("Sending email notification to %s via %s:%d", recipient, smtp_host, smtp_port)
         try:
             with smtplib.SMTP(smtp_host, smtp_port) as smtp:
                 smtp.starttls(context=tls_context)
                 smtp.login(username, password)
                 smtp.send_message(email_message)
-        except (OSError, smtplib.SMTPException):
-            LOGGER.exception("Email notification failed for %s via %s", recipient, smtp_host)
+            LOGGER.info("Email notification sent successfully to %s", recipient)
+        except smtplib.SMTPAuthenticationError as error:
+            LOGGER.error("Email authentication failed for %s: invalid credentials for %s", recipient, username)
+        except smtplib.SMTPException as error:
+            LOGGER.exception("Email SMTP error for %s via %s: %s", recipient, smtp_host, error)
+        except OSError as error:
+            LOGGER.exception("Email network error connecting to %s:%d: %s", smtp_host, smtp_port, error)
