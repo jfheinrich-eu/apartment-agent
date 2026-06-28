@@ -13,10 +13,13 @@ set -euo pipefail
 PR_NUMBER="${1:?PR number is required}"
 GITHUB_REPOSITORY="${2:?GitHub repository is required}"
 
-# Dynamically determine the bot's username from the token.
-# gh api user fails with 403 when using GITHUB_TOKEN (installation token),
-# so fall back to GITHUB_ACTOR in that case.
-BOT_USERNAME=$(gh api user --jq '.login' 2>/dev/null || echo "${GITHUB_ACTOR:-github-actions[bot]}")
+# Prefer actor, and override with authenticated user only when API call succeeds.
+BOT_USERNAME="${GITHUB_ACTOR:-github-actions[bot]}"
+if API_LOGIN=$(gh api user --jq '.login' 2>/dev/null); then
+  if [[ -n "$API_LOGIN" ]]; then
+    BOT_USERNAME="$API_LOGIN"
+  fi
+fi
 echo "Detected bot username: $BOT_USERNAME"
 
 # Get current HEAD commit SHA of the PR
@@ -24,7 +27,7 @@ CURRENT_COMMIT=$(gh pr view "$PR_NUMBER" --json headRefOid --jq '.headRefOid')
 echo "Current PR HEAD commit: $CURRENT_COMMIT"
 
 # Get all reviews from the bot with their commit SHAs
-REVIEWS_DATA=$(gh api "/repos/$GITHUB_REPOSITORY/pulls/$PR_NUMBER/reviews" --jq "[.[] | select(.user.login == \"$BOT_USERNAME\") | {commit_id: .commit_id, state: .state}]")
+REVIEWS_DATA=$(gh api "/repos/$GITHUB_REPOSITORY/pulls/$PR_NUMBER/reviews" | jq --arg bot "$BOT_USERNAME" '[.[] | select(.user.login == $bot) | {commit_id: .commit_id, state: .state}]')
 
 echo "Bot reviews found:"
 echo "$REVIEWS_DATA" | jq '.'
