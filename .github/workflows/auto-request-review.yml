@@ -55,7 +55,7 @@ jobs:
       (github.event_name == 'check_suite' && github.event.check_suite.conclusion == 'success') ||
       (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success')
     env:
-      GH_TOKEN: ${{ secrets.BOT_TOKEN }}
+      GH_TOKEN: ${{ secrets.BOT_TOKEN || secrets.JFHEINRICH_BOT_TOKEN }}
       BOT_REVIEWER_LOGIN: jfheinrich-bot
     defaults:
       run:
@@ -64,7 +64,7 @@ jobs:
       - name: Validate BOT token availability
         run: |
           if [[ -z "${GH_TOKEN:-}" ]]; then
-            echo "BOT_TOKEN is not configured; cannot submit review as jfheinrich-bot."
+            echo "Neither BOT_TOKEN nor JFHEINRICH_BOT_TOKEN is configured; cannot submit review as jfheinrich-bot."
             exit 1
           fi
 
