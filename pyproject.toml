@@ -5,7 +5,7 @@ description = "Personal apartment search agent"
 readme = "README.md"
 license = {text = "MIT"}
 authors = [
-    {name = "Jörg", email = "joerg@example.com"}
+    {name = "Jörg", email = "jfheinrich@users.noreply.github.com"}
 ]
 keywords = [
     "apartment",
@@ -26,11 +26,11 @@ dependencies = [
 ]
 
 [project.urls]
-Repository = "https://github.com/joerg/wohnung_agent"
-Homepage = "https://github.com/joerg/wohnung_agent"
-Documentation = "https://github.com/joerg/wohnung_agent/blob/main/README.md"
-Issues = "https://github.com/joerg/wohnung_agent/issues"
-Changelog = "https://github.com/joerg/wohnung_agent/releases"
+Repository = "https://github.com/jfheinrich-eu/apartment-agent"
+Homepage = "https://github.com/jfheinrich-eu/apartment-agent"
+Documentation = "https://github.com/jfheinrich-eu/apartment-agent/blob/main/README.md"
+Issues = "https://github.com/jfheinrich-eu/apartment-agent/issues"
+Changelog = "https://github.com/jfheinrich-eu/apartment-agent/releases"
 
 [project.optional-dependencies]
 dev = [

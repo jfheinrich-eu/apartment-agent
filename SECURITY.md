@@ -53,7 +53,7 @@ We monitor dependencies for known vulnerabilities using:
 
 ## Reporting Other Issues
 
-For non-security bugs or feature requests, please use [GitHub Issues](https://github.com/yourusername/wohnung_agent/issues).
+For non-security bugs or feature requests, please use [GitHub Issues](https://github.com/jfheinrich-eu/apartment-agent/issues).
 
 ---
 

@@ -1,7 +1,7 @@
 # Wohnung Agent v1
 
-[![CI](https://github.com/joerg/wohnung_agent/actions/workflows/ci.yml/badge.svg)](https://github.com/joerg/wohnung_agent/actions/workflows/ci.yml)
-[![Security](https://github.com/joerg/wohnung_agent/actions/workflows/security.yml/badge.svg)](https://github.com/joerg/wohnung_agent/actions/workflows/security.yml)
+[![CI](https://github.com/jfheinrich-eu/apartment-agent/actions/workflows/ci.yml/badge.svg)](https://github.com/jfheinrich-eu/apartment-agent/actions/workflows/ci.yml)
+[![Security](https://github.com/jfheinrich-eu/apartment-agent/actions/workflows/security.yml/badge.svg)](https://github.com/jfheinrich-eu/apartment-agent/actions/workflows/security.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
 
@@ -227,4 +227,4 @@ This project is licensed under the MIT License - see [LICENSE](LICENSE) file for
 - 📖 [README](README.md) - Project overview and usage
 - 🛠️ [CONTRIBUTING.md](CONTRIBUTING.md) - Development guidelines
 - 🔒 [SECURITY.md](SECURITY.md) - Security policy and vulnerability reporting
-- 📝 [Issues](https://github.com/joerg/wohnung_agent/issues) - Bug reports and feature requests
+- 📝 [Issues](https://github.com/jfheinrich-eu/apartment-agent/issues) - Bug reports and feature requests

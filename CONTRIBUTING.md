@@ -10,7 +10,7 @@ We are committed to providing a welcoming and inclusive environment. Please be r
 
 ### Reporting Bugs
 
-Before creating a bug report, check the [GitHub Issues](https://github.com/yourusername/wohnung_agent/issues) to see if the problem has already been reported.
+Before creating a bug report, check the [GitHub Issues](https://github.com/jfheinrich-eu/apartment-agent/issues) to see if the problem has already been reported.
 
 When filing a bug report, include:
 - A clear, descriptive title
