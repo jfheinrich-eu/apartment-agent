@@ -50,13 +50,10 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     if: |
-      (
-        github.event_name == 'workflow_dispatch' ||
-        github.event_name == 'pull_request' ||
-        (github.event_name == 'check_suite' && github.event.check_suite.conclusion == 'success') ||
-        (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success')
-      ) &&
-      secrets.BOT_TOKEN != ''
+      github.event_name == 'workflow_dispatch' ||
+      github.event_name == 'pull_request' ||
+      (github.event_name == 'check_suite' && github.event.check_suite.conclusion == 'success') ||
+      (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success')
     env:
       GH_TOKEN: ${{ secrets.BOT_TOKEN }}
       BOT_REVIEWER_LOGIN: jfheinrich-bot
