@@ -61,6 +61,13 @@ def build_runner(config_path: str) -> ApartmentSearchRunner:
 
 def main() -> None:
     """Run the command-line interface for the apartment search agent."""
+    # Configure logging at startup for consistent output across all execution modes.
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+        force=True,
+    )
+    
     parser = argparse.ArgumentParser(description="Apartment search agent")
     parser.add_argument("--config", default="config/search_profile.yml")
     parser.add_argument("--once", action="store_true", help="Run once and exit")
