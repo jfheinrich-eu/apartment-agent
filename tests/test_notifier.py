@@ -62,7 +62,7 @@ def test_send_handles_smtp_exception():
         "telegram": {"enabled": False},
         "email": {
             "enabled": True,
-            "smtp_host": "smtp.example.com",
+            "smtp_host": "smtp-test-host",
             "smtp_port": 587,
             "username": "u",
             "password": "p",
@@ -84,7 +84,7 @@ def test_send_logs_smtp_authentication_error_with_endpoint(caplog):
         "telegram": {"enabled": False},
         "email": {
             "enabled": True,
-            "smtp_host": "smtp.example.com",
+            "smtp_host": "smtp-test-host",
             "smtp_port": 587,
             "username": "u",
             "password": "p",
@@ -100,7 +100,7 @@ def test_send_logs_smtp_authentication_error_with_endpoint(caplog):
     with patch("wohnung_agent.notifier.smtplib.SMTP", return_value=smtp_mock):
         notifier.send(make_match())
 
-    assert "smtp.example.com:587" in caplog.text
+    assert "smtp-test-host:587" in caplog.text
     assert "policy rejected" in caplog.text
 
 
