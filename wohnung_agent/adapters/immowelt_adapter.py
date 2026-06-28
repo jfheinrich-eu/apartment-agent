@@ -3,6 +3,7 @@ from __future__ import annotations
 import logging
 import time
 from dataclasses import dataclass
+from numbers import Real
 from typing import Any
 from urllib.parse import urljoin
 
@@ -48,11 +49,15 @@ class ImmoweltAdapter(ApartmentAdapter):
         language: str = "en",
     ) -> None:
         """Configure URL inputs, network timing, and output language."""
+        if not isinstance(timeout_ms, Real) or isinstance(timeout_ms, bool):
+            raise ValueError("timeout_ms must be a positive number")
         if timeout_ms <= 0:
             raise ValueError("timeout_ms must be positive")
+        if not isinstance(throttle_seconds, Real) or isinstance(throttle_seconds, bool):
+            raise ValueError("throttle_seconds must be a non-negative number")
         if throttle_seconds < 0:
             raise ValueError("throttle_seconds must be non-negative")
-        
+
         self.search_urls = [self._normalize_search_url(item) for item in search_urls]
         self.timeout_ms = timeout_ms
         self.throttle_seconds = throttle_seconds
@@ -97,7 +102,6 @@ class ImmoweltAdapter(ApartmentAdapter):
                 except requests.RequestException as error:
                     LOGGER.warning("Immowelt request failed for %s: %s", search_url.url, error)
                 except Exception as error:
-                    # Catch unexpected errors but log with full traceback for debugging
                     LOGGER.exception("Immowelt adapter unexpected failure for %s: %s", search_url.url, error)
         finally:
             session.close()

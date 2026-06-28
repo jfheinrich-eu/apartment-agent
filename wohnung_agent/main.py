@@ -71,6 +71,7 @@ def main() -> None:
     logging.basicConfig(
         level=logging.INFO,
         format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+        force=True,
     )
     
     parser = argparse.ArgumentParser(description="Apartment search agent")
