@@ -24,18 +24,24 @@ def build_runner(config_path: str) -> ApartmentSearchRunner:
 
     adapters = []
 
-    if config.get("demo", {}).get("enabled", False):
+    if config.demo.enabled:
         adapters.append(DemoAdapter())
 
-    immowelt_config = config.get("immowelt", {})
-    if immowelt_config.get("enabled", False):
+    if config.immowelt.enabled:
         try:
             from wohnung_agent.adapters.immowelt_adapter import ImmoweltAdapter
+            # Convert ImmoweltSearchUrlConfig objects to dicts for adapter compatibility
+            search_urls = [
+                {"url": item.url, "city_hint": item.city_hint}
+                if hasattr(item, "url")
+                else item
+                for item in config.immowelt.search_urls
+            ]
             adapters.append(
                 ImmoweltAdapter(
-                    search_urls=immowelt_config.get("search_urls", []),
-                    timeout_ms=immowelt_config.get("timeout_ms", 20_000),
-                    throttle_seconds=immowelt_config.get("throttle_seconds", 2.0),
+                    search_urls=search_urls,
+                    timeout_ms=config.immowelt.timeout_ms,
+                    throttle_seconds=config.immowelt.throttle_seconds,
                     language=language,
                 )
             )

@@ -4,10 +4,9 @@ import logging
 import smtplib
 import ssl
 from email.message import EmailMessage
-from typing import Any
 import requests
 from wohnung_agent.i18n import tr
-from wohnung_agent.models import ApartmentMatch
+from wohnung_agent.models import ApartmentMatch, AppConfig
 
 LOGGER = logging.getLogger(__name__)
 
@@ -32,7 +31,7 @@ def format_match(apartment_match: ApartmentMatch, language: str) -> str:
 class Notifier:
     """Send apartment matches to the configured notification channels."""
 
-    def __init__(self, config: dict[str, Any], language: str = "en") -> None:
+    def __init__(self, config: AppConfig, language: str = "en") -> None:
         """Store notification configuration for Telegram and email delivery."""
         self.config = config
         self.language = language
@@ -45,12 +44,12 @@ class Notifier:
         self._send_email(message)
 
     def _send_telegram(self, message: str) -> None:
-        telegram_config = self.config.get("telegram", {})
-        if not telegram_config.get("enabled"):
+        telegram_config = self.config.telegram
+        if not telegram_config.enabled:
             return
 
-        bot_token = telegram_config.get("bot_token", "")
-        chat_id = telegram_config.get("chat_id", "")
+        bot_token = telegram_config.bot_token
+        chat_id = telegram_config.chat_id
         if not bot_token or not chat_id:
             LOGGER.error("Telegram notification enabled but bot_token or chat_id is missing.")
             return
@@ -73,15 +72,15 @@ class Notifier:
             LOGGER.exception("Telegram notification failed: %s", error)
 
     def _send_email(self, message: str) -> None:
-        email_config = self.config.get("email", {})
-        if not email_config.get("enabled"):
+        email_config = self.config.email
+        if not email_config.enabled:
             return
 
-        smtp_host = email_config.get("smtp_host", "")
-        smtp_port = email_config.get("smtp_port", 587)
-        username = email_config.get("username", "")
-        password = email_config.get("password", "")
-        recipient = email_config.get("recipient", "")
+        smtp_host = email_config.smtp_host
+        smtp_port = email_config.smtp_port
+        username = email_config.username
+        password = email_config.password
+        recipient = email_config.recipient
 
         if not smtp_host or not username or not password or not recipient:
             LOGGER.error("Email notification enabled but required fields (smtp_host, username, password, recipient) are missing.")
